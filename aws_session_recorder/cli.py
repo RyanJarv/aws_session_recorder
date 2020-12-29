@@ -1,7 +1,7 @@
 """Console script for aws_session_recorder."""
 import argparse
 import sys
-import aws_session_recorder
+from aws_session_recorder import lib
 import IPython
 from mypy_boto3_iam import client
 
@@ -12,8 +12,10 @@ def main():
     parser.add_argument('--profile-name', type=str, default='')
     args = parser.parse_args()
 
-    print(args.profile_name)
-    sess = aws_session_recorder.Session(profile_name=args.profile_name)
+    if args.profile_name:
+        sess = lib.Session(profile_name=args.profile_name)
+    else:
+        sess = lib.Session()
 
     if args.shell:
         from aws_session_recorder.lib import schema
