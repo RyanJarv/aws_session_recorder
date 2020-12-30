@@ -13,6 +13,7 @@ from aws_session_recorder.lib import Session, schema
 
 user_name = 'test_user'
 role_name = 'test_role'
+group_name = 'test_role'
 test_policy = '''
 {
     "Version": "2012-10-17",
@@ -125,3 +126,37 @@ def instance_profile(iam: IAMClient) -> t.GetInstanceProfileResponseTypeDef:
 
 def test_instance_profile(session: Session, instance_profile: t.GetInstanceProfileResponseTypeDef):
     assert instance_profile['InstanceProfile']['Arn'] == session.db.query(schema.InstanceProfile).first().Arn
+
+
+@pytest.fixture(scope='function')
+def access_keys(iam: IAMClient, user: t.CreateUserResponseTypeDef) -> t.ListAccessKeysResponseTypeDef:
+    iam.create_access_key(UserName=user['User']['UserName'])
+    return iam.list_access_keys(UserName=user['User']['UserName'])
+
+
+def test_list_access_keys(session: Session, access_keys: t.ListAccessKeysResponseTypeDef):
+    key = access_keys['AccessKeyMetadata'][0]
+    assert key['AccessKeyId'] == session.db.query(schema.AccessKey).first().AccessKeyId
+
+
+def test_user_access_keys(session: Session, access_keys: t.ListAccessKeysResponseTypeDef):
+    key = access_keys['AccessKeyMetadata'][0]
+    assert key['AccessKeyId'] == session.db.query(schema.User).first().access_keys[0].AccessKeyId
+
+
+@pytest.fixture(scope='function')
+def group(iam, user: t.GetUserResponseTypeDef) -> t.GetGroupResponseTypeDef:
+    resp = iam.create_group(GroupName=group_name)
+    iam.add_user_to_group(UserName=user['User']['UserName'], GroupName=resp['Group']['GroupName'])
+    return iam.get_group(GroupName=group_name)
+
+
+def test_group(session, group: t.GetGroupResponseTypeDef):
+    g: schema.Group = session.db.query(schema.Group).all()[0]
+    assert group['Group']['Arn'] == g.Arn
+
+
+# def test_user_has_group(session, group: t.GetGroupResponseTypeDef):
+#     usr: schema.User = session.db.query(schema.User).all()[0]
+#     group: schema.Group = usr.groups[0]
+#     assert group['Group']['Arn'] == group.Arn
