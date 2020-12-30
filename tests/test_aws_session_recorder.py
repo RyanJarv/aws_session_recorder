@@ -35,9 +35,7 @@ def session() -> Iterator[Session]:
 
 @pytest.fixture(scope='function')
 def iam(session) -> IAMClient:
-    iam: IAMClient = session.client('iam')
-    return iam
-
+    return session.client('iam')
 
 @pytest.fixture(scope='function')
 def user(iam) -> GetUserResponseTypeDef:
@@ -87,22 +85,14 @@ def test_inline_user_policy(inline_user_policy: GetUserPolicyResponseTypeDef, se
 
 
 @pytest.fixture(scope='function')
-def policy(iam: IAMClient) -> GetPolicyResponseTypeDef:
+def user_policy(iam: IAMClient) -> GetPolicyResponseTypeDef:
     resp = iam.create_policy(PolicyName='test_policy', PolicyDocument=test_policy)
     return iam.get_policy(PolicyArn=resp['Policy']['Arn'])
 
-@pytest.fixture(scope='function')
-def attached_user_policies(iam: IAMClient, user, policy: GetPolicyResponseTypeDef) -> ListAttachedUserPoliciesResponseTypeDef:
-    iam.attach_user_policy(UserName=user_name, PolicyArn=policy['Policy']['Arn'])
-    return iam.list_attached_user_policies(UserName=user_name)
 
-@pytest.fixture(scope='function')
-def attached_user_policy(iam, attached_user_policies: ListAttachedUserPoliciesResponseTypeDef) -> GetPolicyResponseTypeDef:
-    attached_policy = attached_user_policies['AttachedPolicies'][0]
-    return iam.get_policy(PolicyArn=attached_policy['PolicyArn'])
-
-def test_attached_user_policy(session, attached_user_policy: GetPolicyResponseTypeDef):
-    policy = attached_user_policy['Policy']
+#TODO: Test attachments
+def test_user_policy(session, user_policy: GetPolicyResponseTypeDef):
+    policy = user_policy['Policy']
     for key, value in policy.items():
         # TODO: Use datetime object in db
         if key in ['CreateDate', 'UpdateDate']:
@@ -113,17 +103,24 @@ def test_attached_user_policy(session, attached_user_policy: GetPolicyResponseTy
             continue
         assert value == getattr(session.db.query(schema.Policy).all()[0], key)
 
-    # TODO: ListPolicyVersions
-    # arn = resp['Policy']['Arn']
-    # list_policy_versions: type_defs.ListPolicyVersionsResponseTypeDef = iam.list_policy_versions(PolicyArn=arn)
-    # ver = list_policy_versions['Versions'][0]
-    # resp: type_defs.GetPolicyVersionResponseTypeDef = iam.get_policy_version(PolicyArn=arn, VersionId=ver['VersionId'])
-    # assert resp['PolicyVersion']['VersionId'] == sess.db.query(schema.PolicyVersion).first().VersionId
-    # print("attached policy version ok")
 
-    # TODO: ListInstanceProfiles
-    # resp: type_defs.ListInstanceProfilesResponseTypeDef = iam.list_instance_profiles()
-    # profile = resp['InstanceProfiles'][0]
-    # resp: type_defs.GetInstanceProfileResponseTypeDef = iam.get_instance_profile(InstanceProfileName=profile['InstanceProfileName'])
-    # assert resp['InstanceProfile']['Arn'] == sess.db.query(schema.InstanceProfile).first().Arn
-    # print("instance profile ok")
+@pytest.fixture(scope='function')
+def policy_version(iam: IAMClient, user_policy: GetPolicyResponseTypeDef) -> GetPolicyVersionResponseTypeDef:
+    policy_arn = user_policy['Policy']['Arn']
+    resp: ListPolicyVersionsResponseTypeDef = iam.list_policy_versions(PolicyArn=policy_arn)
+    first_version = resp['Versions'][0]['VersionId']
+    return iam.get_policy_version(PolicyArn=policy_arn, VersionId=first_version)
+
+
+def test_policy_version(session: Session, policy_version: GetPolicyVersionResponseTypeDef):
+    assert policy_version['PolicyVersion']['VersionId'] == session.db.query(schema.PolicyVersion).first().VersionId
+
+
+@pytest.fixture(scope='function')
+def instance_profile(iam: IAMClient) -> GetInstanceProfileResponseTypeDef:
+    resp = iam.create_instance_profile(InstanceProfileName='test_instance_profile')
+    return iam.get_instance_profile(InstanceProfileName=resp['InstanceProfile']['InstanceProfileName'])
+
+
+def test_instance_profile(session: Session, instance_profile: GetInstanceProfileResponseTypeDef):
+    assert instance_profile['InstanceProfile']['Arn'] == session.db.query(schema.InstanceProfile).first().Arn
