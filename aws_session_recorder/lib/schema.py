@@ -70,10 +70,10 @@ class Identity(Base):
 
     __tablename__ = "identity"
 
-    id: int = sa.Column(sa.Integer, primary_key=True)
+    id: int = sa.Column(sa.Integer, unique=True)
 
     Path: str = sa.Column(sa.String)
-    Arn: str = sa.Column(sa.String, unique=True)
+    Arn: str = sa.Column(sa.String, primary_key=True)
     CreateDate: str = sa.Column(sa.String)
     Tags: List[t.TagTypeDef] = sa.Column(JSONType)
 
@@ -125,11 +125,12 @@ class User(Identity):
 
     __tablename__ = "user"
 
-    UserName: str = sa.Column(sa.String, unique=True)
+    UserName: str = sa.Column(sa.String, primary_key=True)
     UserId: str = sa.Column(sa.String)
 
-    id = sa.Column(sa.Integer, sa.ForeignKey('identity.id'), primary_key=True)
+    id = sa.Column(sa.Integer, sa.ForeignKey('identity.Arn'))
     access_keys = relationship("AccessKey", back_populates="user")
+
     groups = relationship("Group", back_populates="users", secondary=group_membership)
 
     inline_policies: UserPolicy = relationship("UserPolicy", cascade="all, delete-orphan", back_populates="user")
