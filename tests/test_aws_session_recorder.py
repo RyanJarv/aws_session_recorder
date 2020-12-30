@@ -76,14 +76,19 @@ def inline_user_policy(iam, user) -> t.GetUserPolicyResponseTypeDef:
     iam.put_user_policy(UserName=user_name, PolicyName='test_policy', PolicyDocument=test_policy)
     return iam.get_user_policy(UserName=user_name, PolicyName='test_policy')
 
+def test_inline_user_policy(session, inline_user_policy: t.GetUserPolicyResponseTypeDef):
+    assert inline_user_policy['PolicyName'] == session.db.query(schema.UserPolicy).first().PolicyName
 
-def test_inline_user_policy(inline_user_policy: t.GetUserPolicyResponseTypeDef, session):
-    for key, value in inline_user_policy.items():
-        if key == 'PolicyDocument':
-            # TODO: Fix this edge case
-            assert json.dumps(value) == json.dumps(json.loads(getattr(session.db.query(schema.InlinePolicy).all()[0], key)))
-            continue
-        assert value == getattr(session.db.query(schema.InlinePolicy).all()[0], key)
+def test_inline_user_policy_by_user(session, inline_user_policy: t.GetUserPolicyResponseTypeDef):
+    live_name = inline_user_policy['PolicyName']
+    user: schema.User = session.db.query(schema.User).first()
+    assert live_name == user.inline_policies[0].PolicyName
+
+def test_inline_user_policy_document(session, inline_user_policy: t.GetUserPolicyResponseTypeDef):
+    live_doc = json.dumps(inline_user_policy['PolicyDocument'])
+    # TODO: Fix this edge case
+    db_doc = json.dumps(json.loads(session.db.query(schema.UserPolicy).first().PolicyDocument))
+    assert live_doc == db_doc
 
 
 @pytest.fixture(scope='function')
@@ -151,11 +156,11 @@ def group(iam, user: t.GetUserResponseTypeDef) -> t.GetGroupResponseTypeDef:
     return iam.get_group(GroupName=group_name)
 
 
-def test_group(session, group: t.GetGroupResponseTypeDef):
-    g: schema.Group = session.db.query(schema.Group).all()[0]
-    assert group['Group']['Arn'] == g.Arn
-
-
+# def test_group(session, group: t.GetGroupResponseTypeDef):
+#     g: schema.Group = session.db.query(schema.Group).all()[0]
+#     assert group['Group']['Arn'] == g.Arn
+#
+#
 # def test_user_has_group(session, group: t.GetGroupResponseTypeDef):
 #     usr: schema.User = session.db.query(schema.User).all()[0]
 #     group: schema.Group = usr.groups[0]

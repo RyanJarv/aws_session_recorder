@@ -19,24 +19,6 @@ else:
 Base: DeclarativeMeta = declarative_base()
 
 
-class InlinePolicy(Base):
-    __tablename__ = "inline_policies"
-
-    def __init__(self, resp: t.GetUserPolicyResponseTypeDef):
-        # This key actually does exist, tests will fail if we remove this
-        if resp.get('ResponseMetadata'):  # type: ignore[misc]
-            del resp['ResponseMetadata']  # type: ignore[misc]
-        super().__init__(**resp)
-
-    id = sa.Column(sa.Integer, primary_key=True)
-    UserName = sa.Column(sa.String)
-    PolicyName = sa.Column(sa.String)
-    PolicyDocument = sa.Column(JSONType)
-
-    identity_id = sa.Column(sa.Integer, sa.ForeignKey('identity.id'))
-    identity = relationship("Identity", back_populates="inline_policies")
-
-
 policy_attachments = sa.Table('policy_attachments', Base.metadata,
                               sa.Column('identity_id', sa.Integer, sa.ForeignKey('identity.id')),
                               sa.Column('policy_id', sa.Integer, sa.ForeignKey('policy.id')),
@@ -95,8 +77,6 @@ class Identity(Base):
     CreateDate: str = sa.Column(sa.String)
     Tags: List[t.TagTypeDef] = sa.Column(JSONType)
 
-    inline_policies: InlinePolicy = relationship("InlinePolicy", cascade="all, delete-orphan",
-                                                 back_populates="identity")
     attached_policies = relationship("Policy", secondary=policy_attachments)
 
     type: str = sa.Column(sa.String(20))
@@ -113,8 +93,31 @@ group_membership = sa.Table('group_membership', Base.metadata,
                             )
 
 
+def GetUserPolicy(resp: t.GetUserPolicyResponseTypeDef):
+    # This key actually does exist, tests will fail if we remove this
+    if resp.get('ResponseMetadata'):  # type: ignore[misc]
+        del resp['ResponseMetadata']  # type: ignore[misc]
+    return UserPolicy(resp)
+
+
+class UserPolicy(Base):
+    __tablename__ = "user_policy"
+
+    def __init__(self, resp: t.GetUserPolicyResponseTypeDef):
+        super().__init__(**resp)
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    UserName = sa.Column(sa.String, sa.ForeignKey('user.UserName'))
+    PolicyName = sa.Column(sa.String)
+    PolicyDocument = sa.Column(JSONType)
+
+    #user_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
+    user = relationship("User", back_populates="inline_policies")
+
+
 def GetUser(resp: t.GetUserResponseTypeDef):
     return User(resp['User'])
+
 
 class User(Identity):
     def __init__(self, resp: t.UserTypeDef):
@@ -122,12 +125,14 @@ class User(Identity):
 
     __tablename__ = "user"
 
-    UserName: str = sa.Column(sa.String)
+    UserName: str = sa.Column(sa.String, unique=True)
     UserId: str = sa.Column(sa.String)
 
     id = sa.Column(sa.Integer, sa.ForeignKey('identity.id'), primary_key=True)
     access_keys = relationship("AccessKey", back_populates="user")
     groups = relationship("Group", back_populates="users", secondary=group_membership)
+
+    inline_policies: UserPolicy = relationship("UserPolicy", cascade="all, delete-orphan", back_populates="user")
 
     __mapper_args__ = {
         'polymorphic_identity': 'user'
@@ -226,7 +231,7 @@ def GetGroup(resp: t.GetGroupResponseTypeDef) -> Iterator[Union[Group, User]]:
 ApiCallMap = {
     'GetUser': GetUser,
     'GetRole': Role,
-    'GetUserPolicy': InlinePolicy,
+    'GetUserPolicy': GetUserPolicy,
     'GetPolicy': Policy,
     'GetPolicyVersion': PolicyVersion,
     'GetInstanceProfile': InstanceProfile,
