@@ -88,7 +88,7 @@ class Identity(Base):
 
 
 group_membership = sa.Table('group_membership', Base.metadata,
-                            sa.Column('user_id', sa.Integer, sa.ForeignKey('user.id')),
+                            sa.Column('user_id', sa.String, sa.ForeignKey('user.arn')),
                             sa.Column('group_id', sa.Integer, sa.ForeignKey('group.id')),
                             )
 
@@ -128,7 +128,7 @@ class User(Identity):
     UserName: str = sa.Column(sa.String, primary_key=True)
     UserId: str = sa.Column(sa.String)
 
-    id = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
+    arn = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
     access_keys = relationship("AccessKey", back_populates="user")
 
     groups = relationship("Group", back_populates="users", secondary=group_membership)
@@ -158,7 +158,7 @@ class Role(Identity):
     MaxSessionDuration: int = sa.Column(sa.Integer)
     RoleLastUsed: dict = sa.Column(JSONType)
 
-    id = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
+    arn = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
     __mapper_args__ = {
         'polymorphic_identity': 'role'
     }
@@ -179,7 +179,7 @@ class InstanceProfile(Identity):
     # TODO Should reference a role
     Roles: List[dict] = sa.Column(JSONType)
 
-    id = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
+    arn = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
     __mapper_args__ = {
         'polymorphic_identity': 'instance_profile'
     }
