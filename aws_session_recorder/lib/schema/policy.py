@@ -59,18 +59,3 @@ class Policy(Base):
     attached_to = relationship("Identity", secondary=policy_attachments, back_populates="attached_policies")
     versions: List[PolicyVersion] = relationship("PolicyVersion", back_populates="policy")
 
-
-class UserPolicy(Base):
-    __tablename__ = "user_policy"
-
-    def __init__(self, resp: t.GetUserPolicyResponseTypeDef):
-        super().__init__(**resp)
-
-    id = sa.Column(sa.Integer, primary_key=True)
-    UserName = sa.Column(sa.String, sa.ForeignKey('user.UserName'))
-    PolicyName = sa.Column(sa.String)
-    PolicyDocument = sa.Column(JSONType)
-
-    #user_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
-    user = relationship("User", back_populates="inline_policies")
-
