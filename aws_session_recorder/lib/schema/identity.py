@@ -96,7 +96,7 @@ def GetGroup(resp: t.GetGroupResponseTypeDef) -> Iterator[Union[Group, User]]:
 class AccessKey(Base):
     __tablename__ = "access_key"
 
-    def __init__(self, key: t.AccessKeyTypeDef):
+    def __init__(self, key: t.AccessKeyMetadataTypeDef):
         super().__init__(**key)
 
     id: int = sa.Column(sa.Integer, primary_key=True)
