@@ -2,8 +2,8 @@
 import argparse
 import sys
 from aws_session_recorder import lib
-import IPython
-from mypy_boto3_iam import client
+import IPython  # type: ignore
+from mypy_boto3_iam import client  # type: ignore
 
 def main():
     """Console script for aws_session_recorder."""

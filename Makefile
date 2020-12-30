@@ -50,6 +50,9 @@ clean-test: ## remove test and coverage artifacts
 lint: ## check style with flake8
 	flake8 aws_session_recorder tests
 
+mypy:
+	mypy --show-error-codes tests aws_session_recorder
+
 test: ## run tests quickly with the default Python
 	pytest
 
