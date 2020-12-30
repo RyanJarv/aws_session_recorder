@@ -9,16 +9,21 @@ import sqlalchemy  # type: ignore
 import sqlalchemy.orm  # type: ignore
 import sqlalchemy.ext.declarative  # type: ignore
 
-from aws_session_recorder.lib import schema
+from aws_session_recorder.lib.schema.base import Base
+from aws_session_recorder.lib.schema.identity import GetUser, Role, InstanceProfile, ListAccessKeys, GetGroup
+from aws_session_recorder.lib.schema.policy import Policy, GetUserPolicy, PolicyVersion
 
 
-#import aws_session_recorder.helpers as helpers
-# Don't import types during runtime
-# if TYPE_CHECKING:
-#     from mypy_boto3_iam import client
-# else:
-#     client = helpers.AlwaysDoNothing
-
+ApiCallMap = {
+    'GetUser': GetUser,
+    'GetRole': Role,
+    'GetUserPolicy': GetUserPolicy,
+    'GetPolicy': Policy,
+    'GetPolicyVersion': PolicyVersion,
+    'GetInstanceProfile': InstanceProfile,
+    'ListAccessKeys': ListAccessKeys,
+    'GetGroup': GetGroup,
+}
 
 class Session(boto3.session.Session):
     db: sqlalchemy.orm.Session
@@ -30,7 +35,7 @@ class Session(boto3.session.Session):
 
     def setup(self):
         engine = sqlalchemy.create_engine("sqlite:///:memory:", echo=False)
-        schema.Base.metadata.create_all(engine)
+        Base.metadata.create_all(engine)
         self.db = sqlalchemy.orm.Session(engine)
 
     def client(self, *args, **kwargs):
@@ -47,7 +52,7 @@ class Session(boto3.session.Session):
                *args, **kwargs):
 
         try:
-            f = schema.ApiCallMap[model.name]
+            f = ApiCallMap[model.name]
         except KeyError:
             print("Schema not implemented for {}".format(model.name))
             return
@@ -58,3 +63,5 @@ class Session(boto3.session.Session):
                 self.db.merge(r)
         else:
             self.db.merge(row)
+
+

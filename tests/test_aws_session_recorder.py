@@ -2,14 +2,16 @@
 
 """Tests for `aws_session_recorder` package."""
 import json
-from typing import Iterator, List
+from typing import Iterator
 
 import pytest  # type: ignore
 from moto import mock_iam # type: ignore
 from mypy_boto3_iam.client import IAMClient  # type: ignore
 from mypy_boto3_iam import type_defs as t  # type: ignore
 
-from aws_session_recorder.lib import Session, schema
+from aws_session_recorder.lib.schema.identity import User, Role, AccessKey, Group, InstanceProfile
+from aws_session_recorder.lib.schema.policy import UserPolicy, Policy, PolicyVersion
+from aws_session_recorder.lib.session import Session
 
 user_name = 'test_user'
 role_name = 'test_role'
@@ -50,7 +52,7 @@ def test_user(user, session):
         # TODO: Use datetime object in db
         if key == 'CreateDate':
             value = str(value)
-        assert value == getattr(session.db.query(schema.User).all()[0], key)
+        assert value == getattr(session.db.query(User).all()[0], key)
 
 
 @pytest.fixture(scope='function')
@@ -66,9 +68,9 @@ def test_role(role, session):
             value = str(value)
         if key == 'AssumeRolePolicyDocument':
             # TODO: Fix this edge case
-            assert json.dumps(value) == json.dumps(json.loads(getattr(session.db.query(schema.Role).all()[0], key)))
+            assert json.dumps(value) == json.dumps(json.loads(getattr(session.db.query(Role).all()[0], key)))
             continue
-        assert value == getattr(session.db.query(schema.Role).all()[0], key)
+        assert value == getattr(session.db.query(Role).all()[0], key)
 
 
 @pytest.fixture(scope='function')
@@ -77,17 +79,17 @@ def inline_user_policy(iam, user) -> t.GetUserPolicyResponseTypeDef:
     return iam.get_user_policy(UserName=user_name, PolicyName='test_policy')
 
 def test_inline_user_policy(session, inline_user_policy: t.GetUserPolicyResponseTypeDef):
-    assert inline_user_policy['PolicyName'] == session.db.query(schema.UserPolicy).first().PolicyName
+    assert inline_user_policy['PolicyName'] == session.db.query(UserPolicy).first().PolicyName
 
 def test_inline_user_policy_by_user(session, inline_user_policy: t.GetUserPolicyResponseTypeDef):
     live_name = inline_user_policy['PolicyName']
-    user: schema.User = session.db.query(schema.User).first()
+    user: User = session.db.query(User).first()
     assert live_name == user.inline_policies[0].PolicyName
 
 def test_inline_user_policy_document(session, inline_user_policy: t.GetUserPolicyResponseTypeDef):
     live_doc = json.dumps(inline_user_policy['PolicyDocument'])
     # TODO: Fix this edge case
-    db_doc = json.dumps(json.loads(session.db.query(schema.UserPolicy).first().PolicyDocument))
+    db_doc = json.dumps(json.loads(session.db.query(UserPolicy).first().PolicyDocument))
     assert live_doc == db_doc
 
 
@@ -108,7 +110,7 @@ def test_user_policy(session, user_policy: t.GetPolicyResponseTypeDef):
         # TODO: Look into why the db records 0 instead of 1 here
         if key == 'AttachmentCount':
             continue
-        assert value == getattr(session.db.query(schema.Policy).all()[0], key)
+        assert value == getattr(session.db.query(Policy).all()[0], key)
 
 
 @pytest.fixture(scope='function')
@@ -120,7 +122,7 @@ def policy_version(iam: IAMClient, user_policy: t.GetPolicyResponseTypeDef) -> t
 
 
 def test_policy_version(session: Session, policy_version: t.GetPolicyVersionResponseTypeDef):
-    assert policy_version['PolicyVersion']['VersionId'] == session.db.query(schema.PolicyVersion).first().VersionId
+    assert policy_version['PolicyVersion']['VersionId'] == session.db.query(PolicyVersion).first().VersionId
 
 
 @pytest.fixture(scope='function')
@@ -130,7 +132,7 @@ def instance_profile(iam: IAMClient) -> t.GetInstanceProfileResponseTypeDef:
 
 
 def test_instance_profile(session: Session, instance_profile: t.GetInstanceProfileResponseTypeDef):
-    assert instance_profile['InstanceProfile']['Arn'] == session.db.query(schema.InstanceProfile).first().Arn
+    assert instance_profile['InstanceProfile']['Arn'] == session.db.query(InstanceProfile).first().Arn
 
 
 @pytest.fixture(scope='function')
@@ -141,12 +143,12 @@ def access_keys(iam: IAMClient, user: t.CreateUserResponseTypeDef) -> t.ListAcce
 
 def test_list_access_keys(session: Session, access_keys: t.ListAccessKeysResponseTypeDef):
     key = access_keys['AccessKeyMetadata'][0]
-    assert key['AccessKeyId'] == session.db.query(schema.AccessKey).first().AccessKeyId
+    assert key['AccessKeyId'] == session.db.query(AccessKey).first().AccessKeyId
 
 
 def test_user_access_keys(session: Session, access_keys: t.ListAccessKeysResponseTypeDef):
     key = access_keys['AccessKeyMetadata'][0]
-    assert key['AccessKeyId'] == session.db.query(schema.User).first().access_keys[0].AccessKeyId
+    assert key['AccessKeyId'] == session.db.query(User).first().access_keys[0].AccessKeyId
 
 
 @pytest.fixture(scope='function')
@@ -157,17 +159,17 @@ def group(iam, user: t.GetUserResponseTypeDef) -> t.GetGroupResponseTypeDef:
 
 
 def test_group(session, group: t.GetGroupResponseTypeDef):
-    g: schema.Group = session.db.query(schema.Group).all()[0]
+    g: Group = session.db.query(Group).all()[0]
     assert group['Group']['Arn'] == g.Arn
 
 
 def test_group_has_users(session, group: t.GetGroupResponseTypeDef):
-    db_grp: schema.Group = session.db.query(schema.Group).all()[0]
+    db_grp: Group = session.db.query(Group).all()[0]
     assert group['Users'][0]['Arn'] == db_grp.users[0].Arn
 
 
 def test_user_has_group(session, group: t.GetGroupResponseTypeDef):
-    usr: schema.User = session.db.query(schema.User).all()[0]
-    db_group: schema.Group = usr.groups[0]
+    usr: User = session.db.query(User).all()[0]
+    db_group: Group = usr.groups[0]
     assert group['Group']['Arn'] == db_group.Arn
 
