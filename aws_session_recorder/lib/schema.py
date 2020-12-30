@@ -128,7 +128,7 @@ class User(Identity):
     UserName: str = sa.Column(sa.String, primary_key=True)
     UserId: str = sa.Column(sa.String)
 
-    id = sa.Column(sa.Integer, sa.ForeignKey('identity.Arn'))
+    id = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
     access_keys = relationship("AccessKey", back_populates="user")
 
     groups = relationship("Group", back_populates="users", secondary=group_membership)
@@ -152,13 +152,13 @@ class Role(Identity):
 
         super().__init__(resp["Role"])
 
-    RoleName: str = sa.Column(sa.String)
+    RoleName: str = sa.Column(sa.String, primary_key=True)
     RoleId: str = sa.Column(sa.String)
     AssumeRolePolicyDocument: dict = sa.Column(JSONType)
     MaxSessionDuration: int = sa.Column(sa.Integer)
     RoleLastUsed: dict = sa.Column(JSONType)
 
-    id = sa.Column(sa.Integer, sa.ForeignKey('identity.id'), primary_key=True)
+    id = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
     __mapper_args__ = {
         'polymorphic_identity': 'role'
     }
@@ -172,14 +172,14 @@ class InstanceProfile(Identity):
         resp['InstanceProfile']['Roles'] = json.loads(json.dumps(resp['InstanceProfile']['Roles'], default=str))
         super().__init__(resp['InstanceProfile'])
 
-    InstanceProfileName: str = sa.Column(sa.String)
+    InstanceProfileName: str = sa.Column(sa.String, primary_key=True)
     InstanceProfileId: str = sa.Column(sa.String)
     AssumeRolePolicyDocument: dict = sa.Column(JSONType)
 
     # TODO Should reference a role
     Roles: List[dict] = sa.Column(JSONType)
 
-    id = sa.Column(sa.Integer, sa.ForeignKey('identity.id'), primary_key=True)
+    id = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
     __mapper_args__ = {
         'polymorphic_identity': 'instance_profile'
     }
