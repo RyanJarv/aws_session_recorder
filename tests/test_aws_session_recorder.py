@@ -2,7 +2,7 @@
 
 """Tests for `aws_session_recorder` package."""
 import json
-from typing import Iterator
+from typing import Iterator, List
 
 import pytest  # type: ignore
 from moto import mock_iam # type: ignore
@@ -156,12 +156,18 @@ def group(iam, user: t.GetUserResponseTypeDef) -> t.GetGroupResponseTypeDef:
     return iam.get_group(GroupName=group_name)
 
 
-# def test_group(session, group: t.GetGroupResponseTypeDef):
-#     g: schema.Group = session.db.query(schema.Group).all()[0]
-#     assert group['Group']['Arn'] == g.Arn
-#
-#
-# def test_user_has_group(session, group: t.GetGroupResponseTypeDef):
-#     usr: schema.User = session.db.query(schema.User).all()[0]
-#     group: schema.Group = usr.groups[0]
-#     assert group['Group']['Arn'] == group.Arn
+def test_group(session, group: t.GetGroupResponseTypeDef):
+    g: schema.Group = session.db.query(schema.Group).all()[0]
+    assert group['Group']['Arn'] == g.Arn
+
+
+def test_group_has_users(session, group: t.GetGroupResponseTypeDef):
+    db_grp: schema.Group = session.db.query(schema.Group).all()[0]
+    assert group['Users'][0]['Arn'] == db_grp.users[0].Arn
+
+
+def test_user_has_group(session, group: t.GetGroupResponseTypeDef):
+    usr: schema.User = session.db.query(schema.User).all()[0]
+    db_group: schema.Group = usr.groups[0]
+    assert group['Group']['Arn'] == db_group.Arn
+

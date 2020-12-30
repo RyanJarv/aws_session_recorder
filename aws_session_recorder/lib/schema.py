@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING, Iterator, Union
+from typing import TYPE_CHECKING, Iterator, Union, Any
 
 from typing import List
 
@@ -114,10 +114,25 @@ class UserPolicy(Base):
     #user_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
     user = relationship("User", back_populates="inline_policies")
 
+class Group(Base):
+    __tablename__ = "group"
+
+    def __init__(self, key: t.GroupTypeDef):
+        super().__init__(**key)
+
+    id: int = sa.Column(sa.Integer, primary_key=True)
+
+    Path: str = sa.Column(sa.String)
+    GroupName: str = sa.Column(sa.String)
+    GroupId: str = sa.Column(sa.String)
+    Arn: dict = sa.Column(sa.String)
+    CreateDate: str = sa.Column(sa.String)
+
+    users: List[Any] = relationship("User", back_populates="groups", secondary=group_membership)
+
 
 def GetUser(resp: t.GetUserResponseTypeDef):
     return User(resp['User'])
-
 
 class User(Identity):
     def __init__(self, resp: t.UserTypeDef):
@@ -131,9 +146,9 @@ class User(Identity):
     arn = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
     access_keys = relationship("AccessKey", back_populates="user")
 
-    groups = relationship("Group", back_populates="users", secondary=group_membership)
+    groups: List[Group] = relationship("Group", back_populates="users", secondary=group_membership)
 
-    inline_policies: UserPolicy = relationship("UserPolicy", cascade="all, delete-orphan", back_populates="user")
+    inline_policies: List[UserPolicy] = relationship("UserPolicy", cascade="all, delete-orphan", back_populates="user")
 
     __mapper_args__ = {
         'polymorphic_identity': 'user'
@@ -198,7 +213,7 @@ class AccessKey(Base):
     Status: dict = sa.Column(sa.String)
     CreateDate: str = sa.Column(sa.String)
 
-    user = relationship("User", back_populates="access_keys")
+    user: User = relationship("User", back_populates="access_keys")
 
 
 def ListAccessKeys(resp: t.ListAccessKeysResponseTypeDef) -> Iterator[AccessKey]:
@@ -206,28 +221,10 @@ def ListAccessKeys(resp: t.ListAccessKeysResponseTypeDef) -> Iterator[AccessKey]
         yield AccessKey(key)
 
 
-class Group(Base):
-    __tablename__ = "group"
-
-    def __init__(self, key: t.GroupTypeDef):
-        super().__init__(**key)
-
-    id: int = sa.Column(sa.Integer, primary_key=True)
-
-    Path: str = sa.Column(sa.String)
-    GroupName: str = sa.Column(sa.String)
-    GroupId: str = sa.Column(sa.String)
-    Arn: dict = sa.Column(sa.String)
-    CreateDate: str = sa.Column(sa.String)
-
-    users = relationship("User", back_populates="groups", secondary=group_membership)
-
-
 def GetGroup(resp: t.GetGroupResponseTypeDef) -> Iterator[Union[Group, User]]:
-    yield Group(resp['Group'])
-    for user in resp['Users']:
-        yield User(user)
-
+    grp: Group = Group(resp['Group'])
+    grp.users = [User(user) for user in resp['Users']]
+    yield grp
 
 ApiCallMap = {
     'GetUser': GetUser,
