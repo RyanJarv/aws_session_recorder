@@ -1,11 +1,4 @@
-import json
 from typing import TYPE_CHECKING, Iterator, Any, Union
-
-from typing import List
-
-import sqlalchemy as sa  # type: ignore
-from sqlalchemy.orm import relationship  # type: ignore
-from sqlalchemy_utils import JSONType  # type: ignore
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.group import Group
