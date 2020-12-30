@@ -9,7 +9,7 @@ from sqlalchemy_utils import JSONType  # type: ignore
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.group import Group
-from aws_session_recorder.lib.schema.identity import Role, InstanceProfile
+from aws_session_recorder.lib.schema.role import Role, InstanceProfile
 from aws_session_recorder.lib.schema.policy import Policy, PolicyVersion
 from aws_session_recorder.lib.schema.user import User, AccessKey, UserPolicy
 

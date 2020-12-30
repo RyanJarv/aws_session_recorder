@@ -10,7 +10,7 @@ from mypy_boto3_iam.client import IAMClient  # type: ignore
 from mypy_boto3_iam import type_defs as t  # type: ignore
 
 from aws_session_recorder.lib.schema.group import Group
-from aws_session_recorder.lib.schema.identity import Role, InstanceProfile
+from aws_session_recorder.lib.schema.role import Role, InstanceProfile
 from aws_session_recorder.lib.schema.policy import Policy, PolicyVersion
 from aws_session_recorder.lib.schema.user import User, AccessKey, UserPolicy
 from aws_session_recorder.lib.session import Session
