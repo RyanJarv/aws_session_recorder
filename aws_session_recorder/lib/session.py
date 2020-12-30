@@ -9,21 +9,8 @@ import sqlalchemy  # type: ignore
 import sqlalchemy.orm  # type: ignore
 import sqlalchemy.ext.declarative  # type: ignore
 
+from aws_session_recorder.lib.schema.functions import ApiCallMap
 from aws_session_recorder.lib.schema.base import Base
-from aws_session_recorder.lib.schema.identity import GetUser, Role, InstanceProfile, ListAccessKeys, GetGroup
-from aws_session_recorder.lib.schema.policy import Policy, GetUserPolicy, PolicyVersion
-
-
-ApiCallMap = {
-    'GetUser': GetUser,
-    'GetRole': Role,
-    'GetUserPolicy': GetUserPolicy,
-    'GetPolicy': Policy,
-    'GetPolicyVersion': PolicyVersion,
-    'GetInstanceProfile': InstanceProfile,
-    'ListAccessKeys': ListAccessKeys,
-    'GetGroup': GetGroup,
-}
 
 class Session(boto3.session.Session):
     db: sqlalchemy.orm.Session

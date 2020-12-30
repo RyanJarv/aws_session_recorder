@@ -61,11 +61,6 @@ class Identity(Base):
         'polymorphic_identity': 'identity'
     }
 
-
-def GetUser(resp: t.GetUserResponseTypeDef):
-    return User(resp['User'])
-
-
 class User(Identity):
     def __init__(self, resp: t.UserTypeDef):
         super().__init__(resp)
@@ -87,11 +82,6 @@ class User(Identity):
     }
 
 
-def GetGroup(resp: t.GetGroupResponseTypeDef) -> Iterator[Union[Group, User]]:
-    grp: Group = Group(resp['Group'])
-    grp.users = [User(user) for user in resp['Users']]
-    yield grp
-
 
 class AccessKey(Base):
     __tablename__ = "access_key"
@@ -107,11 +97,6 @@ class AccessKey(Base):
     CreateDate: str = sa.Column(sa.String)
 
     user: User = relationship("User", back_populates="access_keys")
-
-
-def ListAccessKeys(resp: t.ListAccessKeysResponseTypeDef) -> Iterator[AccessKey]:
-    for key in resp['AccessKeyMetadata']:
-        yield AccessKey(key)
 
 
 class Role(Identity):
@@ -157,7 +142,3 @@ class InstanceProfile(Identity):
     __mapper_args__ = {
         'polymorphic_identity': 'instance_profile'
     }
-
-
-
-

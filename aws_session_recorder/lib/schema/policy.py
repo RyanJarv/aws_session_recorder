@@ -60,13 +60,6 @@ class Policy(Base):
     versions: List[PolicyVersion] = relationship("PolicyVersion", back_populates="policy")
 
 
-def GetUserPolicy(resp: t.GetUserPolicyResponseTypeDef):
-    # This key actually does exist, tests will fail if we remove this
-    if resp.get('ResponseMetadata'):  # type: ignore[misc]
-        del resp['ResponseMetadata']  # type: ignore[misc]
-    return UserPolicy(resp)
-
-
 class UserPolicy(Base):
     __tablename__ = "user_policy"
 
