@@ -10,7 +10,7 @@ from sqlalchemy_utils import JSONType  # type: ignore
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.base import Base, TimeStamp
-from aws_session_recorder.lib.schema.policy import policy_attachments
+#from aws_session_recorder.lib.schema.policy import policy_attachments
 
 if TYPE_CHECKING:
     from mypy_boto3_iam import type_defs as t  # type: ignore
@@ -25,14 +25,15 @@ class Identity(Base):
 
     __tablename__ = "identity"
 
-    id: int = sa.Column(sa.Integer, unique=True)
+    id: int = sa.Column(sa.Integer, unique=True, autoincrement=True)
 
     Path: str = sa.Column(sa.String)
+    #Arn: str = sa.Column(sa.String, primary_key=True)
     Arn: str = sa.Column(sa.String, primary_key=True)
     CreateDate: datetime.datetime = sa.Column(TimeStamp)
     Tags: List[t.TagTypeDef] = sa.Column(JSONType)
 
-    attached_policies = relationship("Policy", secondary=policy_attachments)
+    #attached_policies = relationship("Policy", secondary=policy_attachments)
 
     type: str = sa.Column(sa.String(20))
 

@@ -54,6 +54,28 @@ def test_inline_user_policy_by_user(session, inline_user_policy: t.GetUserPolicy
     assert live_name == user.inline_policies[0].PolicyName
 
 
+@pytest.fixture(scope='function')
+def inline_user_policy_list(iam: IAMClient, user: t.GetUserResponseTypeDef) -> t.ListUserPoliciesResponseTypeDef:
+    iam.put_user_policy(UserName=user_name, PolicyName='test_policy', PolicyDocument=test_policy_doc)
+    return iam.list_user_policies(UserName=user_name)
+
+
+def test_inline_user_policy_list(session: Session, inline_user_policy_list: t.ListUserPoliciesResponseTypeDef):
+    assert inline_user_policy_list['PolicyNames'][0] == session.db.query(UserPolicy).first().PolicyName
+
+
+def test_inline_user_policy_list_by_user(session: Session, inline_user_policy_list: t.ListUserPoliciesResponseTypeDef):
+    live_name = inline_user_policy_list['PolicyNames'][0]
+    user: User = session.db.query(User).first()
+    assert live_name == user.inline_policies[0].PolicyName
+
+# Listing updates the record but doesn't have a PolicyDocument associated with it, so make sure we don't delete the
+# one that already exists with GetUserPolicy.
+def test_inline_user_policy_get_then_list(session: Session, inline_user_policy: t.GetUserPolicyResponseTypeDef, inline_user_policy_list: t.ListUserPoliciesResponseTypeDef):
+    #TODO: Return hash with UserPolicy.PolicyDocument
+    assert inline_user_policy['PolicyDocument'] == json.loads(session.db.query(UserPolicy).first().PolicyDocument)
+
+
 def test_inline_user_policy_document(session, inline_user_policy: t.GetUserPolicyResponseTypeDef):
     live_doc = json.dumps(inline_user_policy['PolicyDocument'])
     # TODO: Fix this edge case

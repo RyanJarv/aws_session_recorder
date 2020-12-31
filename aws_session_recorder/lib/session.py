@@ -27,16 +27,25 @@ class Session(boto3.session.Session):
 
     def client(self, *args, **kwargs):
         client: botocore.client.BaseClient = super().client(*args, **kwargs)
-        client.meta.events.register('after-call.iam.*', self.record)
+        client.meta.events.register('provide-client-params.iam.*', self.record_request)
+        client.meta.events.register('after-call.iam.*', self.record_response)
         return client
 
-    def record(self,
-               http_response: botocore.awsrequest.AWSResponse,
-               parsed: dict,
-               model: botocore.model.OperationModel,
-               context: dict,
-               event_name: str,
-               *args, **kwargs):
+    def record_request(self,
+                       params: dict,
+                       model: botocore.model.OperationModel,
+                       context: dict,
+                       event_name: str,
+                       *args, **kwargs):
+        context['request_params'] = params
+
+    def record_response(self,
+                        http_response: botocore.awsrequest.AWSResponse,
+                        parsed: dict,
+                        model: botocore.model.OperationModel,
+                        context: dict,
+                        event_name: str,
+                        *args, **kwargs):
 
         try:
             f = ApiCallMap[model.name]
@@ -44,7 +53,9 @@ class Session(boto3.session.Session):
             print("Schema not implemented for {}".format(model.name))
             return
 
-        row = f(parsed)  # type: ignore[arg-type]
+        request_params = context['request_params']
+        parsed_resp = parsed
+        row = f(request_params, parsed_resp)  # type: ignore[arg-type]
         if hasattr(row, '__next__'):
             for r in row:
                 self.db.merge(r)

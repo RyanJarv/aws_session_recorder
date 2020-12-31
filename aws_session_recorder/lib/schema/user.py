@@ -1,12 +1,11 @@
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Union, Any
 
 from typing import List
 
 import dateutil
 import sqlalchemy as sa  # type: ignore
 from sqlalchemy.orm import relationship  # type: ignore
-from sqlalchemy_utils import JSONType  # type: ignore
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.base import Base, TimeStamp
@@ -27,11 +26,12 @@ class User(Identity):
     UserId: str = sa.Column(sa.String)
 
     arn = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
-    access_keys = relationship("AccessKey", back_populates="user")
+    access_keys = relationship('AccessKey', back_populates='user')
 
-    groups: List[Group] = relationship("Group", back_populates="users", secondary=group_membership)
+    groups: List[Group] = relationship('Group', back_populates='users', secondary=group_membership)
 
-    inline_policies: 'List[UserPolicy]' = relationship("UserPolicy", cascade="all, delete-orphan", back_populates="user")
+    attached_policies: 'List[Policy]' = relationship('UserPolicyAttachments', back_populates='user')
+    inline_policies:   'List[UserPolicy]' = relationship('UserPolicy', cascade='all, delete-orphan', back_populates='user')
 
     __mapper_args__ = {
         'polymorphic_identity': 'user'
@@ -57,7 +57,7 @@ class AccessKey(Base):
 class UserPolicy(InlinePolicy):
     __tablename__ = "user_policy"
 
-    def __init__(self, resp: t.GetRolePolicyResponseTypeDef):
+    def __init__(self, resp: Union[t.GetUserPolicyResponseTypeDef, Dict[str, Any]]):
         super().__init__(**resp)
 
     policy_name = sa.Column(sa.String, sa.ForeignKey('inline_policy.PolicyName'), primary_key=True)

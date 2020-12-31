@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Union
 
 from typing import List
 
@@ -51,7 +51,7 @@ class InstanceProfile(Identity):
 class RolePolicy(InlinePolicy):
     __tablename__ = "role_policy"
 
-    def __init__(self, resp: t.GetRolePolicyResponseTypeDef):
+    def __init__(self, resp: Union[t.GetRolePolicyResponseTypeDef, Dict]):
         super().__init__(**resp)
 
     policy_name = sa.Column(sa.String, sa.ForeignKey('inline_policy.PolicyName'), primary_key=True)

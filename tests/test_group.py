@@ -48,6 +48,27 @@ def test_user_has_group(session, group: t.GetGroupResponseTypeDef):
 
 
 @pytest.fixture(scope='function')
+def inline_group_policy_list(iam: IAMClient, group: t.GetGroupResponseTypeDef) -> t.ListGroupPoliciesResponseTypeDef:
+    iam.put_group_policy(GroupName=group_name, PolicyName='test_policy', PolicyDocument=test_policy_doc)
+    return iam.list_group_policies(GroupName=group_name)
+
+
+def test_inline_group_policy_list(session: Session, inline_group_policy_list: t.ListGroupPoliciesResponseTypeDef):
+    assert inline_group_policy_list['PolicyNames'][0] == session.db.query(GroupPolicy).first().PolicyName
+
+
+def test_inline_group_policy_list_by_group(session: Session, inline_group_policy_list: t.ListGroupPoliciesResponseTypeDef):
+    live_name = inline_group_policy_list['PolicyNames'][0]
+    group: Group = session.db.query(Group).first()
+    assert live_name == group.inline_policies[0].PolicyName
+
+# Listing updates the record but doesn't have a PolicyDocument associated with it, so make sure we don't delete the
+# one that already exists with GetUserPolicy.
+def test_inline_group_policy_get_then_list(session: Session, inline_group_policy: t.GetUserPolicyResponseTypeDef, inline_group_policy_list: t.ListUserPoliciesResponseTypeDef):
+    #TODO: Return hash with UserPolicy.PolicyDocument
+    assert inline_group_policy['PolicyDocument'] == json.loads(session.db.query(GroupPolicy).first().PolicyDocument)
+
+@pytest.fixture(scope='function')
 def inline_group_policy(iam, group) -> t.GetGroupPolicyResponseTypeDef:
     iam.put_group_policy(GroupName=group_name, PolicyName='test_policy', PolicyDocument=test_policy_doc)
     return iam.get_group_policy(GroupName=group_name, PolicyName='test_policy')

@@ -42,6 +42,27 @@ def test_list_roles(session: Session, list_roles: t.ListRolesResponseTypeDef):
     assert len(list_roles['Roles']) == session.db.query(Role).count()
     assert len(list_roles['Roles']) == 2
 
+@pytest.fixture(scope='function')
+def inline_role_policy_list(iam: IAMClient, role: t.GetRoleResponseTypeDef) -> t.ListRolePoliciesResponseTypeDef:
+    iam.put_role_policy(RoleName=role_name, PolicyName='test_policy', PolicyDocument=test_policy_doc)
+    return iam.list_role_policies(RoleName=role_name)
+
+
+def test_inline_role_policy_list(session: Session, inline_role_policy_list: t.ListRolePoliciesResponseTypeDef):
+    assert inline_role_policy_list['PolicyNames'][0] == session.db.query(RolePolicy).first().PolicyName
+
+
+def test_inline_role_policy_list_by_role(session: Session, inline_role_policy_list: t.ListRolePoliciesResponseTypeDef):
+    live_name = inline_role_policy_list['PolicyNames'][0]
+    role: Role = session.db.query(Role).first()
+    assert live_name == role.inline_policies[0].PolicyName
+
+# Listing updates the record but doesn't have a PolicyDocument associated with it, so make sure we don't delete the
+# one that already exists with GetUserPolicy.
+def test_inline_role_policy_get_then_list(session: Session, inline_role_policy: t.GetUserPolicyResponseTypeDef, inline_role_policy_list: t.ListUserPoliciesResponseTypeDef):
+    #TODO: Return hash with UserPolicy.PolicyDocument
+    assert inline_role_policy['PolicyDocument'] == json.loads(session.db.query(RolePolicy).first().PolicyDocument)
+
 
 @pytest.fixture(scope='function')
 def inline_role_policy(iam, role) -> t.GetRolePolicyResponseTypeDef:
