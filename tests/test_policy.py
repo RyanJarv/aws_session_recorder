@@ -11,8 +11,8 @@ def test_policy(session, policy: t.GetPolicyResponseTypeDef):
     policy = policy['Policy']
     for key, value in policy.items():
         # TODO: Use datetime object in db
-        if key in ['CreateDate', 'UpdateDate']:
-            value = str(value)
+        # if key in ['UpdateDate']:
+        #     value = str(value)
 
         # TODO: Look into why the db records 0 instead of 1 here
         if key == 'AttachmentCount':

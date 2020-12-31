@@ -5,10 +5,23 @@ from aws_session_recorder.lib.schema.group import Group, GroupPolicy
 from aws_session_recorder.lib.schema.user import User
 from tests.test_base import *
 
+group_name2 = group_name+"2"
 
 def test_group(session, group: t.GetGroupResponseTypeDef):
     g: Group = session.db.query(Group).all()[0]
     assert group['Group']['Arn'] == g.Arn
+
+
+@pytest.fixture(scope='function')
+def group2(iam) -> t.GetGroupResponseTypeDef:
+    iam.create_group(GroupName=group_name2)
+    return iam.get_group(GroupName=group_name2)
+
+
+def test_group2(session: Session, group, group2):
+    assert session.db.query(Group).count() == 2
+    assert group_name == session.db.query(Group).all()[0].GroupName
+    assert group_name2 == session.db.query(Group).all()[1].GroupName
 
 
 def test_group_has_users(session, group: t.GetGroupResponseTypeDef):
@@ -31,10 +44,12 @@ def inline_group_policy(iam, group) -> t.GetGroupPolicyResponseTypeDef:
 def test_inline_group_policy(session, inline_group_policy: t.GetGroupPolicyResponseTypeDef):
     assert inline_group_policy['PolicyName'] == session.db.query(GroupPolicy).first().PolicyName
 
+
 def test_inline_group_policy_by_group(session, inline_group_policy: t.GetGroupPolicyResponseTypeDef):
     live_name = inline_group_policy['PolicyName']
     group: Group = session.db.query(Group).first()
     assert live_name == group.inline_policies[0].PolicyName
+
 
 def test_inline_group_policy_document(session, inline_group_policy: t.GetGroupPolicyResponseTypeDef):
     live_doc = json.dumps(inline_group_policy['PolicyDocument'])

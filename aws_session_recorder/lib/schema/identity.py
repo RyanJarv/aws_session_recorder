@@ -1,13 +1,15 @@
+import datetime
 from typing import TYPE_CHECKING
 
 from typing import List
 
+import dateutil
 import sqlalchemy as sa  # type: ignore
 from sqlalchemy.orm import relationship  # type: ignore
 from sqlalchemy_utils import JSONType  # type: ignore
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
-from aws_session_recorder.lib.schema.base import Base
+from aws_session_recorder.lib.schema.base import Base, TimeStamp
 from aws_session_recorder.lib.schema.policy import policy_attachments
 
 if TYPE_CHECKING:
@@ -27,7 +29,7 @@ class Identity(Base):
 
     Path: str = sa.Column(sa.String)
     Arn: str = sa.Column(sa.String, primary_key=True)
-    CreateDate: str = sa.Column(sa.String)
+    CreateDate: datetime.datetime = sa.Column(TimeStamp)
     Tags: List[t.TagTypeDef] = sa.Column(JSONType)
 
     attached_policies = relationship("Policy", secondary=policy_attachments)

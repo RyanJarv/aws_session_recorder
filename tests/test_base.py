@@ -45,6 +45,12 @@ def user(iam) -> t.GetUserResponseTypeDef:
 
 
 @pytest.fixture(scope='function')
+def role(iam) -> t.GetRoleResponseTypeDef:
+    iam.create_role(RoleName=role_name, AssumeRolePolicyDocument=test_policy)
+    return iam.get_role(RoleName=role_name)
+
+
+@pytest.fixture(scope='function')
 def group(iam, user: t.GetUserResponseTypeDef) -> t.GetGroupResponseTypeDef:
     resp = iam.create_group(GroupName=group_name)
     iam.add_user_to_group(UserName=user['User']['UserName'], GroupName=resp['Group']['GroupName'])

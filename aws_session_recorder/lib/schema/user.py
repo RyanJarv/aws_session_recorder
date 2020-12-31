@@ -1,13 +1,15 @@
+import datetime
 from typing import TYPE_CHECKING
 
 from typing import List
 
+import dateutil
 import sqlalchemy as sa  # type: ignore
 from sqlalchemy.orm import relationship  # type: ignore
 from sqlalchemy_utils import JSONType  # type: ignore
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
-from aws_session_recorder.lib.schema.base import Base
+from aws_session_recorder.lib.schema.base import Base, TimeStamp
 from aws_session_recorder.lib.schema.group import Group, group_membership
 from aws_session_recorder.lib.schema.identity import Identity, InlinePolicy
 
@@ -50,7 +52,7 @@ class AccessKey(Base):
     UserName: str = sa.Column(sa.String, sa.ForeignKey('user.UserName'))
     AccessKeyId: str = sa.Column(sa.String)
     Status: dict = sa.Column(sa.String)
-    CreateDate: str = sa.Column(sa.String)
+    CreateDate: datetime.datetime = sa.Column(TimeStamp)
 
     user: User = relationship("User", back_populates="access_keys")
 

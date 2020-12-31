@@ -1,13 +1,15 @@
+import datetime
 from typing import TYPE_CHECKING
 
 from typing import List
 
+import dateutil
 import sqlalchemy as sa  # type: ignore
 from sqlalchemy.orm import relationship  # type: ignore
 from sqlalchemy_utils import JSONType  # type: ignore
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
-from aws_session_recorder.lib.schema.base import Base
+from aws_session_recorder.lib.schema.base import Base, TimeStamp
 
 if TYPE_CHECKING:
     from mypy_boto3_iam import type_defs as t  # type: ignore
@@ -28,7 +30,7 @@ class PolicyVersion(Base):
     PolicyVersion: str = sa.Column(sa.String)
     Document: dict = sa.Column(JSONType)
     IsDefaultVersion: bool = sa.Column(sa.Boolean)
-    CreateDate: str = sa.Column(sa.String)  # TODO: should be datetime object
+    CreateDate: datetime.datetime = sa.Column(TimeStamp)
 
     policy_id: int = sa.Column(sa.Integer, sa.ForeignKey('policy.id'))
     policy = relationship("Policy", back_populates="versions")
@@ -47,8 +49,8 @@ class Policy(Base):
     PermissionsBoundaryUsageCount = sa.Column(sa.Integer)
     IsAttachable = sa.Column(sa.Boolean)
     Description = sa.Column(sa.String)
-    CreateDate = sa.Column(sa.String)
-    UpdateDate = sa.Column(sa.String)
+    CreateDate: datetime.datetime = sa.Column(TimeStamp)
+    UpdateDate = sa.Column(TimeStamp)
 
     attached_to = relationship("Identity", secondary=policy_attachments, back_populates="attached_policies")
     versions: List[PolicyVersion] = relationship("PolicyVersion", back_populates="policy")

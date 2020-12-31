@@ -1,13 +1,15 @@
+import datetime
 import json
 from typing import TYPE_CHECKING, Iterator, Any, Union
 
 from typing import List
 
+import dateutil
 import sqlalchemy as sa  # type: ignore
 from sqlalchemy.orm import relationship  # type: ignore
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
-from aws_session_recorder.lib.schema.base import Base
+from aws_session_recorder.lib.schema.base import Base, TimeStamp
 from aws_session_recorder.lib.schema.identity import InlinePolicy
 
 if TYPE_CHECKING:
@@ -33,7 +35,7 @@ class Group(Base):
     GroupName: str = sa.Column(sa.String)
     GroupId: str = sa.Column(sa.String)
     Arn: dict = sa.Column(sa.String)
-    CreateDate: str = sa.Column(sa.String)
+    CreateDate: datetime.datetime = sa.Column(TimeStamp)
 
     users: List[Any] = relationship("User", back_populates="groups", secondary=group_membership)
 

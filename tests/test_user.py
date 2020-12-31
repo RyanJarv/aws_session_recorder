@@ -1,25 +1,37 @@
+import datetime
 import json
 
 """Tests for `aws_session_recorder.lib.schema.user` package."""
 from aws_session_recorder.lib.schema.user import User, AccessKey, UserPolicy
 from tests.test_base import *
 
+user_name2 = user_name+"2"
+
 
 def test_user(user, session):
     for key, value in user['User'].items():
-        # TODO: Use datetime object in db
-        if key == 'CreateDate':
-            value = str(value)
         assert value == getattr(session.db.query(User).all()[0], key)
 
 
 @pytest.fixture(scope='function')
-def inline_user_policy(iam, user) -> t.GetUserPolicyResponseTypeDef:
+def user2(iam) -> t.GetUserResponseTypeDef:
+    iam.create_user(UserName=user_name2)
+    return iam.get_user(UserName=user_name2)
+
+
+def test_user2(session: Session, user: t.GetUserResponseTypeDef, user2: t.GetUserResponseTypeDef):
+    assert session.db.query(User).count() == 2
+    assert user_name == session.db.query(User).all()[0].UserName
+    assert user_name2 == session.db.query(User).all()[1].UserName
+
+
+@pytest.fixture(scope='function')
+def inline_user_policy(iam: IAMClient, user: t.GetUserResponseTypeDef) -> t.GetUserPolicyResponseTypeDef:
     iam.put_user_policy(UserName=user_name, PolicyName='test_policy', PolicyDocument=test_policy)
     return iam.get_user_policy(UserName=user_name, PolicyName='test_policy')
 
 
-def test_inline_user_policy(session, inline_user_policy: t.GetUserPolicyResponseTypeDef):
+def test_inline_user_policy(session: Session, inline_user_policy: t.GetUserPolicyResponseTypeDef):
     assert inline_user_policy['PolicyName'] == session.db.query(UserPolicy).first().PolicyName
 
 
