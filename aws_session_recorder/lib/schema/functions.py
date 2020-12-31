@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Iterator, Any, Union
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
-from aws_session_recorder.lib.schema.group import Group
-from aws_session_recorder.lib.schema.role import Role, InstanceProfile
+from aws_session_recorder.lib.schema.group import Group, GroupPolicy
+from aws_session_recorder.lib.schema.role import Role, InstanceProfile, RolePolicy
 from aws_session_recorder.lib.schema.policy import Policy, PolicyVersion
 from aws_session_recorder.lib.schema.user import User, AccessKey, UserPolicy
 
@@ -31,13 +31,27 @@ def GetUserPolicy(resp: t.GetUserPolicyResponseTypeDef):
     # This key actually does exist, tests will fail if we remove this
     if resp.get('ResponseMetadata'):  # type: ignore[misc]
         del resp['ResponseMetadata']  # type: ignore[misc]
-    return UserPolicy(resp)
+    return UserPolicy(**resp)
 
+def GetRolePolicy(resp: t.GetUserPolicyResponseTypeDef):
+    # This key actually does exist, tests will fail if we remove this
+    if resp.get('ResponseMetadata'):  # type: ignore[misc]
+        del resp['ResponseMetadata']  # type: ignore[misc]
+    return RolePolicy(resp)
+
+
+def GetGroupPolicy(resp: t.GetGroupPolicyResponseTypeDef):
+    # This key actually does exist, tests will fail if we remove this
+    if resp.get('ResponseMetadata'):  # type: ignore[misc]
+        del resp['ResponseMetadata']  # type: ignore[misc]
+    return GroupPolicy(**resp)
 
 ApiCallMap = {
     'GetUser': GetUser,
     'GetRole': Role,
     'GetUserPolicy': GetUserPolicy,
+    'GetRolePolicy': GetRolePolicy,
+    'GetGroupPolicy': GetGroupPolicy,
     'GetPolicy': Policy,
     'GetPolicyVersion': PolicyVersion,
     'GetInstanceProfile': InstanceProfile,

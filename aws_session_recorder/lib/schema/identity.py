@@ -16,6 +16,7 @@ else:
     t = AlwaysDoNothing()
     client = AlwaysDoNothing()
 
+
 class Identity(Base):
     def __init__(self, resp):
         super().__init__(**resp)
@@ -38,3 +39,18 @@ class Identity(Base):
         'polymorphic_identity': 'identity'
     }
 
+
+class InlinePolicy(Base):
+    __tablename__ = "inline_policy"
+
+    id: int = sa.Column(sa.Integer, unique=True)
+
+    PolicyName = sa.Column(sa.String, primary_key=True)
+    PolicyDocument = sa.Column(JSONType)
+
+    type: str = sa.Column(sa.String(20), primary_key=True)
+
+    __mapper_args__ = {
+        'polymorphic_on': type,
+        'polymorphic_identity': 'inline'
+    }

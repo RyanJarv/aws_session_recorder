@@ -9,7 +9,7 @@ from sqlalchemy_utils import JSONType  # type: ignore
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.base import Base
 from aws_session_recorder.lib.schema.group import Group, group_membership
-from aws_session_recorder.lib.schema.identity import Identity
+from aws_session_recorder.lib.schema.identity import Identity, InlinePolicy
 
 if TYPE_CHECKING:
     from mypy_boto3_iam import type_defs as t  # type: ignore
@@ -17,20 +17,6 @@ else:
     t = AlwaysDoNothing()
     client = AlwaysDoNothing()
 
-
-class UserPolicy(Base):
-    __tablename__ = "user_policy"
-
-    def __init__(self, resp: t.GetUserPolicyResponseTypeDef):
-        super().__init__(**resp)
-
-    id = sa.Column(sa.Integer, primary_key=True)
-    UserName = sa.Column(sa.String, sa.ForeignKey('user.UserName'))
-    PolicyName = sa.Column(sa.String)
-    PolicyDocument = sa.Column(JSONType)
-
-    #user_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
-    user: 'List[User]' = relationship("User", back_populates="inline_policies")
 
 class User(Identity):
     def __init__(self, resp: t.UserTypeDef):
@@ -46,12 +32,11 @@ class User(Identity):
 
     groups: List[Group] = relationship("Group", back_populates="users", secondary=group_membership)
 
-    inline_policies: List[UserPolicy] = relationship("UserPolicy", cascade="all, delete-orphan", back_populates="user")
+    inline_policies: 'List[UserPolicy]' = relationship("UserPolicy", cascade="all, delete-orphan", back_populates="user")
 
     __mapper_args__ = {
         'polymorphic_identity': 'user'
     }
-
 
 
 class AccessKey(Base):
@@ -68,4 +53,17 @@ class AccessKey(Base):
     CreateDate: str = sa.Column(sa.String)
 
     user: User = relationship("User", back_populates="access_keys")
+
+
+class UserPolicy(InlinePolicy):
+    __tablename__ = "user_policy"
+
+    policy_name = sa.Column(sa.String, sa.ForeignKey('inline_policy.PolicyName'), primary_key=True)
+    UserName = sa.Column(sa.String, sa.ForeignKey('user.UserName'))
+
+    user: 'List[User]' = relationship("User", back_populates="inline_policies")
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'user'
+    }
 

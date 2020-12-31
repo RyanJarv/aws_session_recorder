@@ -9,8 +9,8 @@ from moto import mock_iam # type: ignore
 from mypy_boto3_iam.client import IAMClient  # type: ignore
 from mypy_boto3_iam import type_defs as t  # type: ignore
 
-from aws_session_recorder.lib.schema.group import Group
-from aws_session_recorder.lib.schema.role import Role, InstanceProfile
+from aws_session_recorder.lib.schema.group import Group, GroupPolicy
+from aws_session_recorder.lib.schema.role import Role, InstanceProfile, RolePolicy
 from aws_session_recorder.lib.schema.policy import Policy, PolicyVersion
 from aws_session_recorder.lib.schema.user import User, AccessKey, UserPolicy
 from aws_session_recorder.lib.session import Session
@@ -96,6 +96,47 @@ def test_inline_user_policy_document(session, inline_user_policy: t.GetUserPolic
 
 
 @pytest.fixture(scope='function')
+def inline_role_policy(iam, role) -> t.GetRolePolicyResponseTypeDef:
+    iam.put_role_policy(RoleName=role_name, PolicyName='test_policy', PolicyDocument=test_policy)
+    return iam.get_role_policy(RoleName=role_name, PolicyName='test_policy')
+
+
+def test_inline_role_policy(session, inline_role_policy: t.GetRolePolicyResponseTypeDef):
+    assert inline_role_policy['PolicyName'] == session.db.query(RolePolicy).first().PolicyName
+
+def test_inline_role_policy_by_role(session, inline_role_policy: t.GetRolePolicyResponseTypeDef):
+    live_name = inline_role_policy['PolicyName']
+    role: Role = session.db.query(Role).first()
+    assert live_name == role.inline_policies[0].PolicyName
+
+def test_inline_role_policy_document(session, inline_role_policy: t.GetRolePolicyResponseTypeDef):
+    live_doc = json.dumps(inline_role_policy['PolicyDocument'])
+    # TODO: Fix this edge case
+    db_doc = json.dumps(json.loads(session.db.query(RolePolicy).first().PolicyDocument))
+    assert live_doc == db_doc
+
+
+@pytest.fixture(scope='function')
+def inline_group_policy(iam, group) -> t.GetGroupPolicyResponseTypeDef:
+    iam.put_group_policy(GroupName=group_name, PolicyName='test_policy', PolicyDocument=test_policy)
+    return iam.get_group_policy(GroupName=group_name, PolicyName='test_policy')
+
+
+def test_inline_group_policy(session, inline_group_policy: t.GetGroupPolicyResponseTypeDef):
+    assert inline_group_policy['PolicyName'] == session.db.query(GroupPolicy).first().PolicyName
+
+def test_inline_group_policy_by_group(session, inline_group_policy: t.GetGroupPolicyResponseTypeDef):
+    live_name = inline_group_policy['PolicyName']
+    group: Group = session.db.query(Group).first()
+    assert live_name == group.inline_policies[0].PolicyName
+
+def test_inline_group_policy_document(session, inline_group_policy: t.GetGroupPolicyResponseTypeDef):
+    live_doc = json.dumps(inline_group_policy['PolicyDocument'])
+    # TODO: Fix this edge case
+    db_doc = json.dumps(json.loads(session.db.query(GroupPolicy).first().PolicyDocument))
+    assert live_doc == db_doc
+
+@pytest.fixture(scope='function')
 def user_policy(iam: IAMClient) -> t.GetPolicyResponseTypeDef:
     resp = iam.create_policy(PolicyName='test_policy', PolicyDocument=test_policy)
     return iam.get_policy(PolicyArn=resp['Policy']['Arn'])
@@ -136,6 +177,10 @@ def instance_profile(iam: IAMClient) -> t.GetInstanceProfileResponseTypeDef:
 def test_instance_profile(session: Session, instance_profile: t.GetInstanceProfileResponseTypeDef):
     assert instance_profile['InstanceProfile']['Arn'] == session.db.query(InstanceProfile).first().Arn
 
+
+# #TODO: Unsure what the best way to populate role's off this data is right now
+# def test_instance_profile_role(session: Session, instance_profile: t.GetInstanceProfileResponseTypeDef):
+#     assert instance_profile['InstanceProfile']['Roles'][0]['Arn'] == session.db.query(Role).first().Arn
 
 @pytest.fixture(scope='function')
 def access_keys(iam: IAMClient, user: t.CreateUserResponseTypeDef) -> t.ListAccessKeysResponseTypeDef:
