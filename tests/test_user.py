@@ -26,8 +26,21 @@ def test_user2(session: Session, user: t.GetUserResponseTypeDef, user2: t.GetUse
 
 
 @pytest.fixture(scope='function')
+def list_users(session: Session, iam: IAMClient) -> t.ListUsersResponseTypeDef:
+    assert 0 == session.db.query(User).count()
+    iam.create_user(UserName=user_name)
+    iam.create_user(UserName=user_name2)
+    return iam.list_users()
+
+
+def test_list_users(session: Session, list_users: t.ListUsersResponseTypeDef):
+    assert len(list_users['Users']) == session.db.query(User).count()
+    assert len(list_users['Users']) == 2
+
+
+@pytest.fixture(scope='function')
 def inline_user_policy(iam: IAMClient, user: t.GetUserResponseTypeDef) -> t.GetUserPolicyResponseTypeDef:
-    iam.put_user_policy(UserName=user_name, PolicyName='test_policy', PolicyDocument=test_policy)
+    iam.put_user_policy(UserName=user_name, PolicyName='test_policy', PolicyDocument=test_policy_doc)
     return iam.get_user_policy(UserName=user_name, PolicyName='test_policy')
 
 

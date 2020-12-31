@@ -20,7 +20,7 @@ def test_role(role, session):
 
 @pytest.fixture(scope='function')
 def role2(iam) -> t.GetRoleResponseTypeDef:
-    iam.create_role(RoleName=role_name2, AssumeRolePolicyDocument=test_policy)
+    iam.create_role(RoleName=role_name2, AssumeRolePolicyDocument=test_policy_doc)
     return iam.get_role(RoleName=role_name2)
 
 
@@ -31,8 +31,21 @@ def test_role2(session: Session, role, role2):
 
 
 @pytest.fixture(scope='function')
+def list_roles(session: Session, iam: IAMClient) -> t.ListUsersResponseTypeDef:
+    assert 0 == session.db.query(Role).count()
+    iam.create_role(RoleName=role_name, AssumeRolePolicyDocument=test_policy_doc)
+    iam.create_role(RoleName=role_name2, AssumeRolePolicyDocument=test_policy_doc)
+    return iam.list_roles()
+
+
+def test_list_roles(session: Session, list_roles: t.ListRolesResponseTypeDef):
+    assert len(list_roles['Roles']) == session.db.query(Role).count()
+    assert len(list_roles['Roles']) == 2
+
+
+@pytest.fixture(scope='function')
 def inline_role_policy(iam, role) -> t.GetRolePolicyResponseTypeDef:
-    iam.put_role_policy(RoleName=role_name, PolicyName='test_policy', PolicyDocument=test_policy)
+    iam.put_role_policy(RoleName=role_name, PolicyName='test_policy', PolicyDocument=test_policy_doc)
     return iam.get_role_policy(RoleName=role_name, PolicyName='test_policy')
 
 

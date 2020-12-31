@@ -21,9 +21,6 @@ else:
 
 
 class User(Identity):
-    def __init__(self, resp: t.UserTypeDef):
-        super().__init__(resp)
-
     __tablename__ = "user"
 
     UserName: str = sa.Column(sa.String, primary_key=True)
@@ -59,6 +56,9 @@ class AccessKey(Base):
 
 class UserPolicy(InlinePolicy):
     __tablename__ = "user_policy"
+
+    def __init__(self, resp: t.GetRolePolicyResponseTypeDef):
+        super().__init__(**resp)
 
     policy_name = sa.Column(sa.String, sa.ForeignKey('inline_policy.PolicyName'), primary_key=True)
     UserName = sa.Column(sa.String, sa.ForeignKey('user.UserName'))

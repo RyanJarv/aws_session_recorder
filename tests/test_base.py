@@ -13,7 +13,7 @@ from aws_session_recorder.lib.session import Session
 user_name = 'test_user'
 role_name = 'test_role'
 group_name = 'test_role'
-test_policy = '''
+test_policy_doc = '''
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -46,7 +46,7 @@ def user(iam) -> t.GetUserResponseTypeDef:
 
 @pytest.fixture(scope='function')
 def role(iam) -> t.GetRoleResponseTypeDef:
-    iam.create_role(RoleName=role_name, AssumeRolePolicyDocument=test_policy)
+    iam.create_role(RoleName=role_name, AssumeRolePolicyDocument=test_policy_doc)
     return iam.get_role(RoleName=role_name)
 
 
@@ -64,5 +64,5 @@ def instance_profile(iam: IAMClient) -> t.GetInstanceProfileResponseTypeDef:
 
 @pytest.fixture(scope='function')
 def policy(iam: IAMClient) -> t.GetPolicyResponseTypeDef:
-    resp = iam.create_policy(PolicyName='test_policy', PolicyDocument=test_policy)
+    resp = iam.create_policy(PolicyName='test_policy', PolicyDocument=test_policy_doc)
     return iam.get_policy(PolicyArn=resp['Policy']['Arn'])

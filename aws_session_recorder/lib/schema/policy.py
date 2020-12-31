@@ -26,6 +26,9 @@ policy_attachments = sa.Table('policy_attachments', Base.metadata,
 class PolicyVersion(Base):
     __tablename__ = "policy_version"
 
+    def __init__(self, resp):
+        super().__init__(**resp)
+
     VersionId: str = sa.Column(sa.String, primary_key=True)
     PolicyVersion: str = sa.Column(sa.String)
     Document: dict = sa.Column(JSONType)
@@ -39,6 +42,9 @@ class PolicyVersion(Base):
 class Policy(Base):
     __tablename__ = "policy"
 
+    def __init__(self, resp):
+        super().__init__(**resp)
+
     id = sa.Column(sa.Integer, primary_key=True)
     PolicyName = sa.Column(sa.String)
     PolicyId = sa.Column(sa.String)
@@ -50,7 +56,7 @@ class Policy(Base):
     IsAttachable = sa.Column(sa.Boolean)
     Description = sa.Column(sa.String)
     CreateDate: datetime.datetime = sa.Column(TimeStamp)
-    UpdateDate = sa.Column(TimeStamp)
+    UpdateDate: datetime.datetime = sa.Column(TimeStamp)
 
     attached_to = relationship("Identity", secondary=policy_attachments, back_populates="attached_policies")
     versions: List[PolicyVersion] = relationship("PolicyVersion", back_populates="policy")

@@ -21,6 +21,19 @@ def test_policy(session, policy: t.GetPolicyResponseTypeDef):
 
 
 @pytest.fixture(scope='function')
+def list_policies(session: Session, iam: IAMClient) -> t.ListPoliciesResponseTypeDef:
+    assert 0 == session.db.query(Policy).count()
+    iam.create_policy(PolicyName='test_policy', PolicyDocument=test_policy_doc)
+    iam.create_policy(PolicyName='test_policy2', PolicyDocument=test_policy_doc)
+    return iam.list_policies(Scope='Local')
+
+
+def test_list_policies(session: Session, list_policies: t.ListPoliciesResponseTypeDef):
+    assert len(list_policies['Policies']) == session.db.query(Policy).count()
+    assert len(list_policies['Policies']) == 2
+
+
+@pytest.fixture(scope='function')
 def policy_version(iam: IAMClient, policy: t.GetPolicyResponseTypeDef) -> t.GetPolicyVersionResponseTypeDef:
     policy_arn = policy['Policy']['Arn']
     resp: t.ListPolicyVersionsResponseTypeDef = iam.list_policy_versions(PolicyArn=policy_arn)
