@@ -13,6 +13,7 @@ else:
     t = AlwaysDoNothing()
     client = AlwaysDoNothing()
 
+
 def GetUser(resp: t.GetUserResponseTypeDef):
     return User(resp['User'])
 
