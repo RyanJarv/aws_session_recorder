@@ -24,9 +24,6 @@ policy_attachments = sa.Table('policy_attachments', Base.metadata,
 class PolicyVersion(Base):
     __tablename__ = "policy_version"
 
-    def __init__(self, resp: t.GetPolicyVersionResponseTypeDef):
-        super().__init__(**resp['PolicyVersion'])
-
     VersionId: str = sa.Column(sa.String, primary_key=True)
     PolicyVersion: str = sa.Column(sa.String)
     Document: dict = sa.Column(JSONType)
@@ -39,9 +36,6 @@ class PolicyVersion(Base):
 
 class Policy(Base):
     __tablename__ = "policy"
-
-    def __init__(self, resp: t.GetPolicyResponseTypeDef):
-        super().__init__(**resp['Policy'])
 
     id = sa.Column(sa.Integer, primary_key=True)
     PolicyName = sa.Column(sa.String)

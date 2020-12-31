@@ -1,3 +1,4 @@
+import json
 from typing import TYPE_CHECKING, Iterator, Any, Union
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
@@ -46,15 +47,40 @@ def GetGroupPolicy(resp: t.GetGroupPolicyResponseTypeDef):
         del resp['ResponseMetadata']  # type: ignore[misc]
     return GroupPolicy(**resp)
 
+
+def GetPolicy(resp: t.GetPolicyResponseTypeDef):
+    return Policy(**resp['Policy'])
+
+
+def GetPolicyVersion(resp: t.GetPolicyVersionResponseTypeDef):
+    return PolicyVersion(**resp['PolicyVersion'])
+
+
+def GetInstanceProfile(resp: t.GetInstanceProfileResponseTypeDef):
+    # TODO: handle datetime in role policy
+    resp['InstanceProfile']['Roles'] = json.loads(json.dumps(resp['InstanceProfile']['Roles'], default=str))
+    return InstanceProfile(resp['InstanceProfile'])
+
+
+def GetRole(resp: t.GetRoleResponseTypeDef):
+    # RoleLastUsed.LastUsedDate returns a datetime.datetime object, workaround this by serialize/deserializing
+    # with default=str
+    # TODO: better way to handle this without making RoleLastUsed a JSONType?
+    if 'RoleLastUsed' in resp['Role']:
+        resp['Role']['RoleLastUsed'] = json.loads(json.dumps(resp['Role']['RoleLastUsed'], default=str))
+
+    return Role(resp["Role"])
+
+
 ApiCallMap = {
     'GetUser': GetUser,
-    'GetRole': Role,
+    'GetRole': GetRole,
     'GetUserPolicy': GetUserPolicy,
     'GetRolePolicy': GetRolePolicy,
     'GetGroupPolicy': GetGroupPolicy,
-    'GetPolicy': Policy,
-    'GetPolicyVersion': PolicyVersion,
-    'GetInstanceProfile': InstanceProfile,
+    'GetPolicy': GetPolicy,
+    'GetPolicyVersion': GetPolicyVersion,
+    'GetInstanceProfile': GetInstanceProfile,
     'ListAccessKeys': ListAccessKeys,
     'GetGroup': GetGroup,
 }
