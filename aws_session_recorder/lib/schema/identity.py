@@ -28,7 +28,6 @@ class Identity(Base):
     id: int = sa.Column(sa.Integer, unique=True, autoincrement=True)
 
     Path: str = sa.Column(sa.String)
-    #Arn: str = sa.Column(sa.String, primary_key=True)
     Arn: str = sa.Column(sa.String, primary_key=True)
     CreateDate: datetime.datetime = sa.Column(TimeStamp)
     Tags: List[t.TagTypeDef] = sa.Column(JSONType)

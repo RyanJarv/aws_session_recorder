@@ -25,6 +25,8 @@ class Role(Identity):
     RoleLastUsed: dict = sa.Column(JSONType)
 
     arn = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
+
+    attached_policies: 'List[Policy]' = relationship('RolePolicyAttachments', back_populates='role')
     inline_policies: 'List[RolePolicy]' = relationship("RolePolicy", cascade="all, delete-orphan", back_populates="role")
 
     __mapper_args__ = {

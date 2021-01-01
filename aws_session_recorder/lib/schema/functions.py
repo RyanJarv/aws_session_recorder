@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Iterator, Any, Union
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.group import Group, GroupPolicy
 from aws_session_recorder.lib.schema.role import Role, InstanceProfile, RolePolicy
-from aws_session_recorder.lib.schema.policy import Policy, PolicyVersion, UserPolicyAttachments
+from aws_session_recorder.lib.schema.policy import Policy, PolicyVersion, UserPolicyAttachments, RolePolicyAttachments
 from aws_session_recorder.lib.schema.user import User, AccessKey, UserPolicy
 
 if TYPE_CHECKING:
@@ -117,13 +117,19 @@ def ListAttachedUserPolicies(req_params: dict, resp: t.ListAttachedUserPoliciesR
         yield Policy({'Arn': node['PolicyArn'], 'PolicyName': node['PolicyName']})
         yield UserPolicyAttachments(node)
 
+def ListAttachedRolePolicies(req_params: dict, resp: t.ListAttachedRolePoliciesResponseTypeDef):
+    for node in resp['AttachedPolicies']:
+        node.update(req_params)
+        yield Policy({'Arn': node['PolicyArn'], 'PolicyName': node['PolicyName']})
+        yield RolePolicyAttachments(node)
+
 
 # TODO:
 #   * get-account-authorization-details
 #   * get-ssh-public-key
 #   * list-attached-group-policies
 #   * list-attached-role-policies
-#   * list-attached-user-policies
+#   * (DONE) list-attached-user-policies
 #   * list-entities-for-policy
 #   * list-ssh-public-keys
 #   * list-service-specific-credentials
@@ -146,6 +152,7 @@ ApiCallMap = {
     'GetRole': GetRole,
     'ListRoles': ListRoles,
     'ListAttachedUserPolicies': ListAttachedUserPolicies,
+    'ListAttachedRolePolicies': ListAttachedRolePolicies,
     'GetUserPolicy': GetUserPolicy,
     'ListUserPolicies': ListUserPolicies,
     'ListPolicies': ListPolicies,

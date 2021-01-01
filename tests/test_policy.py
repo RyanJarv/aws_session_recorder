@@ -1,6 +1,7 @@
 import json
 from typing import Iterator
 
+from aws_session_recorder.lib.schema.role import Role
 from aws_session_recorder.lib.schema.user import User
 
 """Tests for `aws_session_recorder.lib.schema.user` package."""
@@ -54,7 +55,6 @@ def test_user_attachment(session: Session, user_attachment: t.ListAttachedUserPo
 
 @pytest.fixture(scope='function')
 def user_attachment_no_user(session: Session, iam: IAMClient, policy: t.GetPolicyResponseTypeDef) -> t.ListAttachedUserPoliciesResponseTypeDef:
-    assert session.db.query(User).count() == 0
     iam.create_user(UserName=user_name)  # Don't list/get this so it doesn't show up in the db
     iam.attach_user_policy(UserName=user_name, PolicyArn=policy['Policy']['Arn'])
     return iam.list_attached_user_policies(UserName=user_name)
@@ -69,3 +69,24 @@ def user_attachment_no_user(session: Session, iam: IAMClient, policy: t.GetPolic
 
 def test_user_attachment_no_user_by_policy(session: Session, user_attachment_no_user: t.ListAttachedUserPoliciesResponseTypeDef):
     assert user_attachment_no_user['AttachedPolicies'][0]['PolicyArn'] == session.db.query(Policy).first().attached_to_users[0].PolicyArn
+
+
+@pytest.fixture(scope='function')
+def role_attachment(iam: IAMClient, role: t.GetRoleResponseTypeDef, policy: t.GetPolicyResponseTypeDef) -> t.ListAttachedRolePoliciesResponseTypeDef:
+    iam.attach_role_policy(RoleName=role['Role']['RoleName'], PolicyArn=policy['Policy']['Arn'])
+    return iam.list_attached_role_policies(RoleName=role['Role']['RoleName'])
+
+
+def test_role_attachment(session: Session, role_attachment: t.ListAttachedRolePoliciesResponseTypeDef):
+    assert role_attachment['AttachedPolicies'][0]['PolicyArn'] == session.db.query(Role).first().attached_policies[0].PolicyArn
+
+
+@pytest.fixture(scope='function')
+def role_attachment_no_role(session: Session, iam: IAMClient, policy: t.GetPolicyResponseTypeDef) -> t.ListAttachedRolePoliciesResponseTypeDef:
+    iam.create_role(RoleName=role_name, AssumeRolePolicyDocument=test_policy_doc)  # Don't list/get this so it doesn't show up in the db
+    iam.attach_role_policy(RoleName=role_name, PolicyArn=policy['Policy']['Arn'])
+    return iam.list_attached_role_policies(RoleName=role_name)
+
+
+def test_role_attachment_no_role_by_policy(session: Session, role_attachment_no_role: t.ListAttachedRolePoliciesResponseTypeDef):
+    assert role_attachment_no_role['AttachedPolicies'][0]['PolicyArn'] == session.db.query(Policy).first().attached_to_roles[0].PolicyArn
