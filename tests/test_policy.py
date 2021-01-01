@@ -1,6 +1,7 @@
 import json
 from typing import Iterator
 
+from aws_session_recorder.lib.schema.group import Group
 from aws_session_recorder.lib.schema.role import Role
 from aws_session_recorder.lib.schema.user import User
 
@@ -90,3 +91,24 @@ def role_attachment_no_role(session: Session, iam: IAMClient, policy: t.GetPolic
 
 def test_role_attachment_no_role_by_policy(session: Session, role_attachment_no_role: t.ListAttachedRolePoliciesResponseTypeDef):
     assert role_attachment_no_role['AttachedPolicies'][0]['PolicyArn'] == session.db.query(Policy).first().attached_to_roles[0].PolicyArn
+
+
+@pytest.fixture(scope='function')
+def group_attachment(iam: IAMClient, group: t.GetGroupResponseTypeDef, policy: t.GetPolicyResponseTypeDef) -> t.ListAttachedGroupPoliciesResponseTypeDef:
+    iam.attach_group_policy(GroupName=group['Group']['GroupName'], PolicyArn=policy['Policy']['Arn'])
+    return iam.list_attached_group_policies(GroupName=group['Group']['GroupName'])
+
+
+def test_group_attachment(session: Session, group_attachment: t.ListAttachedGroupPoliciesResponseTypeDef):
+    assert group_attachment['AttachedPolicies'][0]['PolicyArn'] == session.db.query(Group).first().attached_policies[0].PolicyArn
+
+
+@pytest.fixture(scope='function')
+def group_attachment_no_group(session: Session, iam: IAMClient, policy: t.GetPolicyResponseTypeDef) -> t.ListAttachedGroupPoliciesResponseTypeDef:
+    iam.create_group(GroupName=group_name)  # Don't list/get this so it doesn't show up in the db
+    iam.attach_group_policy(GroupName=group_name, PolicyArn=policy['Policy']['Arn'])
+    return iam.list_attached_group_policies(GroupName=group_name)
+
+
+def test_group_attachment_no_group_by_policy(session: Session, group_attachment_no_group: t.ListAttachedGroupPoliciesResponseTypeDef):
+    assert group_attachment_no_group['AttachedPolicies'][0]['PolicyArn'] == session.db.query(Policy).first().attached_to_groups[0].PolicyArn

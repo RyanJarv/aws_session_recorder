@@ -57,6 +57,7 @@ def test_inline_role_policy_list_by_role(session: Session, inline_role_policy_li
     role: Role = session.db.query(Role).first()
     assert live_name == role.inline_policies[0].PolicyName
 
+
 # Listing updates the record but doesn't have a PolicyDocument associated with it, so make sure we don't delete the
 # one that already exists with GetUserPolicy.
 def test_inline_role_policy_get_then_list(session: Session, inline_role_policy: t.GetUserPolicyResponseTypeDef, inline_role_policy_list: t.ListUserPoliciesResponseTypeDef):

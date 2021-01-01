@@ -40,6 +40,7 @@ class Group(Base):
 
     users: List[Any] = relationship("User", back_populates="groups", secondary=group_membership)
 
+    attached_policies: 'List[Policy]' = relationship('GroupPolicyAttachments', back_populates='group')
     inline_policies: 'List[GroupPolicy]' = relationship("GroupPolicy", cascade="all, delete-orphan", back_populates="group")
 
 

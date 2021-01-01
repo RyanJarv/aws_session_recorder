@@ -51,6 +51,20 @@ class RolePolicyAttachments(Base):
     policy = relationship('Policy', back_populates='attached_to_roles')
 
 
+class GroupPolicyAttachments(Base):
+    __tablename__ = "group_policy_attachments"
+
+    def __init__(self, resp):
+        super().__init__(**resp)
+
+    GroupName = sa.Column('GroupName', sa.String, sa.ForeignKey('group.GroupName'), primary_key=True)
+    PolicyArn = sa.Column('PolicyArn', sa.String, sa.ForeignKey('policy.Arn'), primary_key=True)
+    PolicyName = sa.Column('PolicyName', sa.String)
+
+    group = relationship('Group', back_populates='attached_policies')
+    policy = relationship('Policy', back_populates='attached_to_groups')
+
+
 class Policy(Base):
     __tablename__ = "policy"
 
@@ -72,9 +86,10 @@ class Policy(Base):
 
     attached_to_users = relationship("UserPolicyAttachments", back_populates='policy')
     attached_to_roles = relationship("RolePolicyAttachments", back_populates='policy')
+    attached_to_groups = relationship("GroupPolicyAttachments", back_populates='policy')
+    #attached_to_groups: 'List[Identity]' = relationship("Identity", secondary=user_policy_attachements, back_populates='attached_policies')
     #attached_to_users: 'List[Identity]' = relationship("User", secondary=user_policy_attachments, back_populates='attached_policies')
     #attached_to_roles: 'List[Identity]' = relationship("Identity", secondary=user_policy_attachements, back_populates='attached_policies')
-    #attached_to_groups: 'List[Identity]' = relationship("Identity", secondary=user_policy_attachements, back_populates='attached_policies')
 
     versions: 'List[PolicyVersion]' = relationship("PolicyVersion", back_populates="policy")
 
