@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Dict, Union, Any
 
 from typing import List
 
-import dateutil
 import sqlalchemy as sa  # type: ignore
 from sqlalchemy.orm import relationship  # type: ignore
 

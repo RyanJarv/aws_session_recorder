@@ -1,5 +1,4 @@
 """Main module."""
-from typing import Callable
 
 import boto3  # type: ignore
 import botocore.client  # type: ignore

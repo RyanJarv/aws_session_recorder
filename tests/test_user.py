@@ -1,4 +1,3 @@
-import datetime
 import json
 
 """Tests for `aws_session_recorder.lib.schema.user` package."""

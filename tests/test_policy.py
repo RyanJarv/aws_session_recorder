@@ -1,6 +1,3 @@
-import json
-from typing import Iterator
-
 from aws_session_recorder.lib.schema.group import Group
 from aws_session_recorder.lib.schema.role import Role
 from aws_session_recorder.lib.schema.user import User

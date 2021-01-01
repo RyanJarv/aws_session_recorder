@@ -1,6 +1,7 @@
+"""Tests for `aws_session_recorder.lib.schema.user` package."""
+
 import json
 
-"""Tests for `aws_session_recorder.lib.schema.user` package."""
 from aws_session_recorder.lib.schema.group import Group, GroupPolicy
 from aws_session_recorder.lib.schema.user import User
 from tests.test_base import *

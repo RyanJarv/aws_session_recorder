@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING, Iterator, Any, Union
+from typing import TYPE_CHECKING, Iterator
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.group import Group, GroupPolicy
@@ -134,9 +134,6 @@ def ListAttachedGroupPolicies(req_params: dict, resp: t.ListAttachedGroupPolicie
 # TODO:
 #   * get-account-authorization-details
 #   * get-ssh-public-key
-#   * list-attached-group-policies
-#   * list-attached-role-policies
-#   * (DONE) list-attached-user-policies
 #   * list-entities-for-policy
 #   * list-ssh-public-keys
 #   * list-service-specific-credentials

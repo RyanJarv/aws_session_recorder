@@ -1,6 +1,3 @@
-import json
-from typing import Iterator
-
 """Tests for `aws_session_recorder.lib.schema.user` package."""
 from aws_session_recorder.lib.schema.role import InstanceProfile
 from tests.test_base import *

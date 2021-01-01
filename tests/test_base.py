@@ -1,6 +1,5 @@
-#!/usr/bin/env python
-
 """Tests for `aws_session_recorder` package."""
+
 from typing import Iterator
 
 import pytest  # type: ignore

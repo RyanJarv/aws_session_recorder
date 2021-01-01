@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 
 from typing import List
 
-import dateutil
 import sqlalchemy as sa  # type: ignore
 from sqlalchemy.orm import relationship  # type: ignore
 from sqlalchemy_utils import JSONType  # type: ignore
@@ -87,9 +86,6 @@ class Policy(Base):
     attached_to_users = relationship("UserPolicyAttachments", back_populates='policy')
     attached_to_roles = relationship("RolePolicyAttachments", back_populates='policy')
     attached_to_groups = relationship("GroupPolicyAttachments", back_populates='policy')
-    #attached_to_groups: 'List[Identity]' = relationship("Identity", secondary=user_policy_attachements, back_populates='attached_policies')
-    #attached_to_users: 'List[Identity]' = relationship("User", secondary=user_policy_attachments, back_populates='attached_policies')
-    #attached_to_roles: 'List[Identity]' = relationship("Identity", secondary=user_policy_attachements, back_populates='attached_policies')
 
     versions: 'List[PolicyVersion]' = relationship("PolicyVersion", back_populates="policy")
 
