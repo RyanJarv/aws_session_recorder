@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_session_recorder"
-version = "0.1.0"
+version = "0.2.0"
 description = "AWS session that records discovered resources to a database"
 authors = ["Ryan Gerstenkorn <ryan.gerstenkorn@rhinosecuritylabs.com>"]
 license = "BSD"
@@ -16,7 +16,6 @@ SQLAlchemy-Utils = "^0.36.8"
 ipython = {version = "^7.20.0", optional = true}
 typer = {version = "^0.3.2", optional = true}
 sqlite-utils = "^3.4.1"
-moto = {extras = ["iam"], version = "^1.3.16"}
 datasette = "^0.54.1"
 
 [tool.poetry.extras]
