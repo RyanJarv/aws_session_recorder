@@ -1,4 +1,5 @@
 """Main module."""
+import os
 
 import boto3  # type: ignore
 import botocore.client  # type: ignore
@@ -8,7 +9,6 @@ import sqlalchemy  # type: ignore
 import sqlalchemy.orm  # type: ignore
 import sqlalchemy.ext.declarative  # type: ignore
 
-from aws_session_recorder import settings
 from aws_session_recorder.lib.schema.functions import ApiCallMap
 from aws_session_recorder.lib.schema.base import Base
 
@@ -17,12 +17,12 @@ class Session(boto3.session.Session):
     db: sqlalchemy.orm.Session
     Base: sqlalchemy.ext.declarative.DeclarativeMeta
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, connection_string: str = f"sqlite:///{os.path.join(os.getcwd(), 'sqlite.db')}", *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.setup()
+        self.setup(connection_string=connection_string)
 
-    def setup(self):
-        engine = sqlalchemy.create_engine(settings.DATABASE_CONNECTION_PATH, echo=False)
+    def setup(self, connection_string: str):
+        engine = sqlalchemy.create_engine(connection_string, echo=False)
         Base.metadata.create_all(engine)
         self.db = sqlalchemy.orm.Session(engine)
 

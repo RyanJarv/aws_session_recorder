@@ -9,7 +9,6 @@ if typing.TYPE_CHECKING:
     from mypy_boto3_iam.client import IAMClient  # type: ignore
     from mypy_boto3_iam import type_defs as t  # type: ignore
 
-from aws_session_recorder import settings
 from aws_session_recorder.lib.session import Session
 
 user_name = 'test_user'
@@ -31,9 +30,8 @@ test_policy_doc = '''
 
 @pytest.fixture(scope='function')
 def session() -> Iterator[Session]:
-    settings.DATABASE_CONNECTION_PATH = "sqlite:///:memory:"
     with mock_iam():
-        yield Session()
+        yield Session("sqlite:///:memory:")
 
 
 @pytest.fixture(scope='function')

@@ -1,30 +1,22 @@
 import typing
 
 import IPython
-import sqlalchemy
 import typer
 
-from aws_session_recorder import lib, settings
-from aws_session_recorder.lib.schema.base import Base
+import aws_session_recorder
 
 app = typer.Typer(name='aws_session_recorder')
 
 if typing.TYPE_CHECKING:
     from mypy_boto3_iam import service_resource as r
 
-sess: lib.Session = lib.Session()
+sess: aws_session_recorder.Session = aws_session_recorder.Session()
 
 
 @app.callback()
 def session(profile: str = typer.Option(None)):
     global sess
-    sess = lib.Session(profile_name=profile)
-
-
-@app.command()
-def setup():
-    engine = sqlalchemy.create_engine(settings.DATABASE_CONNECTION_PATH, echo=False)
-    Base.metadata.create_all(engine)
+    sess = aws_session_recorder.Session(profile_name=profile)
 
 
 @app.command()

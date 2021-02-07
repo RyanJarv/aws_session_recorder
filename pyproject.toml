@@ -6,7 +6,7 @@ authors = ["Ryan Gerstenkorn <ryan.gerstenkorn@rhinosecuritylabs.com>"]
 license = "BSD"
 
 [tool.poetry.scripts]
-aws_session_recorder = "aws_session_recorder.main:app"
+asr = "aws_session_recorder.main:app"
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -28,6 +28,8 @@ boto3-stubs = {extras = ["iam"], version = "^1.17.3"}
 pytest = "^6.2.2"
 flake8 = "^3.8.4"
 mypy = "^0.800"
+Sphinx = "^3.4.3"
+tox = "^3.21.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

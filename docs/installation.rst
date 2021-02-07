@@ -12,7 +12,15 @@ To install aws-session-recorder, run this command in your terminal:
 
 .. code-block:: console
 
+    $ python3 -m venv venv
+    $ . venv/bin/activate
     $ pip install aws_session_recorder
+
+You can also optionally install the cli extras for easy testing.
+
+.. code-block:: console
+
+    $ pip install 'aws_session_recorder[cli]'
 
 This is the preferred method to install aws-session-recorder, as it will always install the most recent stable release.
 
@@ -44,7 +52,7 @@ Once you have a copy of the source, you can install it with:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ python install .
 
 
 .. _Github repo: https://github.com/RyanJarv/aws_session_recorder

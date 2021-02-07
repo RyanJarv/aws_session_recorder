@@ -32,26 +32,6 @@ Features
 * Records IAM related Get/List requests to a local sqlite.db.
 * Use datasette to view recorded data.
 
-CLI
-----
-For the moment this package isn't in PyPi, you can manage a virtualenv locally with poetry though.
-::
-    git clone https://github.com/RyanJarv/aws_session_recorder.git
-    cd aws_session_recorder
-    pip install poetry
-    poetry install
-    poetry shell
-    python -m aws_session_recorder --profile <aws profile> shell
-
-From here you'll be dropped in to a IPython shell which has an IAM boto3 resource object named iam. You can poke around and use it just like you usually would.
-
-After you have some run a few requests, you can view the data in the sqlite.db with datasette.
-::
-    poetry run datasette serve -o sqlite.db 
-
-This should open your browser to the datasette web console.
-
-
 Credits
 -------
 

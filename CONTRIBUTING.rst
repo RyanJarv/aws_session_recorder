@@ -64,11 +64,13 @@ Ready to contribute? Here's how to set up `aws_session_recorder` for local devel
 
     $ git clone git@github.com:your_name_here/aws_session_recorder.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+3. Install your local copy into a virtualenv. Assuming you  have Poetry installed (https://python-poetry.org/docs/) installed, this is how you set up your fork for local development::
 
-    $ mkvirtualenv aws_session_recorder
-    $ cd aws_session_recorder/
-    $ python setup.py develop
+
+    $ cd aws_session_recorder
+    $ poetry shell
+    $ poetry install
+    $ python -m aws_session_recorder
 
 4. Create a branch for local development::
 
@@ -77,13 +79,10 @@ Ready to contribute? Here's how to set up `aws_session_recorder` for local devel
    Now you can make your changes locally.
 
 5. When you're done making changes, check that your changes pass flake8 and the
-   tests, including testing other Python versions with tox::
+   tests::
 
-    $ flake8 aws_session_recorder tests
-    $ python setup.py test or pytest
-    $ tox
-
-   To get flake8 and tox, just pip install them into your virtualenv.
+    $ make lint
+    $ make test
 
 6. Commit your changes and push your branch to GitHub::
 
@@ -102,7 +101,7 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.5, 3.6, 3.7 and 3.8, and for PyPy. Check
+3. The pull request should work for Python 3.7, 3.8 and 3.9, and for PyPy. Check
    https://travis-ci.com/RyanJarv/aws_session_recorder/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
