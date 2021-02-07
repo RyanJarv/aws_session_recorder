@@ -37,36 +37,36 @@ def session() -> Iterator[Session]:
 
 
 @pytest.fixture(scope='function')
-def iam(session) -> IAMClient:
+def iam(session) -> 'IAMClient':
     return session.client('iam')
 
 
 @pytest.fixture(scope='function')
-def user(iam) -> t.GetUserResponseTypeDef:
+def user(iam) -> 't.GetUserResponseTypeDef':
     iam.create_user(UserName=user_name)
     return iam.get_user(UserName=user_name)
 
 
 @pytest.fixture(scope='function')
-def role(iam) -> t.GetRoleResponseTypeDef:
+def role(iam) -> 't.GetRoleResponseTypeDef':
     iam.create_role(RoleName=role_name, AssumeRolePolicyDocument=test_policy_doc)
     return iam.get_role(RoleName=role_name)
 
 
 @pytest.fixture(scope='function')
-def group(iam, user: t.GetUserResponseTypeDef) -> t.GetGroupResponseTypeDef:
+def group(iam, user: 't.GetUserResponseTypeDef') -> 't.GetUserResponseTypeDef':
     resp = iam.create_group(GroupName=group_name)
     iam.add_user_to_group(UserName=user['User']['UserName'], GroupName=resp['Group']['GroupName'])
     return iam.get_group(GroupName=group_name)
 
 
 @pytest.fixture(scope='function')
-def instance_profile(iam: IAMClient) -> t.GetInstanceProfileResponseTypeDef:
+def instance_profile(iam: 'IAMClient') -> 't.GetInstanceProfileResponseTypeDef':
     resp = iam.create_instance_profile(InstanceProfileName='test_instance_profile')
     return iam.get_instance_profile(InstanceProfileName=resp['InstanceProfile']['InstanceProfileName'])
 
 
 @pytest.fixture(scope='function')
-def policy(iam: IAMClient) -> t.GetPolicyResponseTypeDef:
+def policy(iam: 'IAMClient') -> 't.GetPolicyResponseTypeDef':
     resp = iam.create_policy(PolicyName='test_policy', PolicyDocument=test_policy_doc)
     return iam.get_policy(PolicyArn=resp['Policy']['Arn'])

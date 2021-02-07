@@ -15,80 +15,80 @@ else:
     client = AlwaysDoNothing()
 
 
-def GetUser(req_params: dict, resp: t.GetUserResponseTypeDef):
+def GetUser(req_params: dict, resp: 't.GetUserResponseTypeDef'):
     return User(resp['User'])
 
 
-def ListUsers(req_params: dict, resp: t.ListUsersResponseTypeDef):
+def ListUsers(req_params: dict, resp: 't.ListUsersResponseTypeDef'):
     for node in resp['Users']:
         yield User(node)
 
 
-def GetGroup(req_params: dict, resp: t.GetGroupResponseTypeDef) -> Iterator[Group]:
+def GetGroup(req_params: dict, resp: 't.GetUserResponseTypeDef') -> Iterator[Group]:
     grp: Group = Group(resp['Group'])
     grp.users = [User(user) for user in resp['Users']]
     yield grp
 
 
-def ListGroups(req_params: dict, resp: t.ListGroupsResponseTypeDef):
+def ListGroups(req_params: dict, resp: 't.ListGroupsResponseTypeDef'):
     for node in resp['Groups']:
         yield Group(node)
 
 
-def ListAccessKeys(req_params: dict, resp: t.ListAccessKeysResponseTypeDef) -> Iterator[AccessKey]:
+def ListAccessKeys(req_params: dict, resp: 't.ListAccessKeysResponseTypeDef') -> Iterator[AccessKey]:
     for key in resp['AccessKeyMetadata']:
         yield AccessKey(key)
 
 
-def ListUserPolicies(req_params: dict, resp: t.ListUserPoliciesResponseTypeDef):
+def ListUserPolicies(req_params: dict, resp: 't.ListUserPoliciesResponseTypeDef'):
     # UserName is only present in the req_params, merge with resp so we can correlate the list to a user
     for policy_name in resp['PolicyNames']:
         yield UserPolicy({'UserName': req_params['UserName'], 'PolicyName': policy_name})
 
 
-def GetUserPolicy(req_params: dict, resp: t.GetUserPolicyResponseTypeDef):
+def GetUserPolicy(req_params: dict, resp: 't.GetUserPolicyResponseTypeDef'):
     # This key actually does exist, tests will fail if we remove this
     if resp.get('ResponseMetadata'):  # type: ignore[misc]
         del resp['ResponseMetadata']  # type: ignore[misc]
     return UserPolicy(resp)
 
 
-def GetRolePolicy(req_params: dict, resp: t.GetRolePolicyResponseTypeDef):
+def GetRolePolicy(req_params: dict, resp: 't.GetRolePolicyResponseTypeDef'):
     # This key actually does exist, tests will fail if we remove this
     if resp.get('ResponseMetadata'):  # type: ignore[misc]
         del resp['ResponseMetadata']  # type: ignore[misc]
     return RolePolicy(resp)
 
 
-def ListRolePolicies(req_params: dict, resp: t.ListRolePoliciesResponseTypeDef):
+def ListRolePolicies(req_params: dict, resp: 't.ListRolePoliciesResponseTypeDef'):
     # UserName is only present in the req_params, merge with resp so we can correlate the list to a user
     for policy_name in resp['PolicyNames']:
         yield RolePolicy({'RoleName': req_params['RoleName'], 'PolicyName': policy_name})
 
 
-def GetGroupPolicy(req_params: dict, resp: t.GetGroupPolicyResponseTypeDef) -> GroupPolicy:
+def GetGroupPolicy(req_params: dict, resp: 't.GetGroupPolicyResponseTypeDef') -> GroupPolicy:
     # This key actually does exist, tests will fail if we remove this
     if resp.get('ResponseMetadata'):  # type: ignore[misc]
         del resp['ResponseMetadata']  # type: ignore[misc]
     return GroupPolicy(resp)
 
 
-def ListGroupPolicies(req_params: dict, resp: t.ListGroupPoliciesResponseTypeDef):
+def ListGroupPolicies(req_params: dict, resp: 't.ListGroupPoliciesResponseTypeDef'):
     # UserName is only present in the req_params, merge with resp so we can correlate the list to a user
     for policy_name in resp['PolicyNames']:
         yield GroupPolicy({'GroupName': req_params['GroupName'], 'PolicyName': policy_name})
 
 
-def GetPolicy(req_params: dict, resp: t.GetPolicyResponseTypeDef) -> Policy:
+def GetPolicy(req_params: dict, resp: 't.GetPolicyResponseTypeDef') -> Policy:
     return Policy(resp['Policy'])
 
 
-def ListPolicies(req_params: dict, resp: t.ListPoliciesResponseTypeDef) -> Iterator[Policy]:
+def ListPolicies(req_params: dict, resp: 't.ListPoliciesResponseTypeDef') -> Iterator[Policy]:
     for p in resp['Policies']:
         yield Policy(p)
 
 
-def GetPolicyVersion(req_params: dict, resp: t.GetPolicyVersionResponseTypeDef):
+def GetPolicyVersion(req_params: dict, resp: 't.GetPolicyVersionResponseTypeDef'):
     return PolicyVersion(resp['PolicyVersion'])
 
 
@@ -97,13 +97,13 @@ def ListPolicyVersions(req_params: dict, resp: t.ListPolicyVersionsResponseTypeD
         yield PolicyVersion(version)
 
 
-def GetInstanceProfile(req_params: dict, resp: t.GetInstanceProfileResponseTypeDef):
+def GetInstanceProfile(req_params: dict, resp: 't.GetInstanceProfileResponseTypeDef'):
     # TODO: handle datetime in role policy
     resp['InstanceProfile']['Roles'] = json.loads(json.dumps(resp['InstanceProfile']['Roles'], default=str))
     return InstanceProfile(resp['InstanceProfile'])
 
 
-def GetRole(req_params: dict, resp: t.GetRoleResponseTypeDef):
+def GetRole(req_params: dict, resp: 't.GetRoleResponseTypeDef'):
     # RoleLastUsed.LastUsedDate returns a datetime.datetime object, workaround this by serialize/deserializing
     # with default=str
     # TODO: better way to handle this without making RoleLastUsed a JSONType?
@@ -118,21 +118,21 @@ def ListRoles(req_params: dict, resp: t.ListRolesResponseTypeDef):
         yield Role(node)
 
 
-def ListAttachedUserPolicies(req_params: dict, resp: t.ListAttachedUserPoliciesResponseTypeDef):
+def ListAttachedUserPolicies(req_params: dict, resp: 't.ListAttachedUserPoliciesResponseTypeDef'):
     for node in resp['AttachedPolicies']:
         node.update(req_params)
         yield Policy({'Arn': node['PolicyArn'], 'PolicyName': node['PolicyName']})
         yield UserPolicyAttachments(node)
 
 
-def ListAttachedRolePolicies(req_params: dict, resp: t.ListAttachedRolePoliciesResponseTypeDef):
+def ListAttachedRolePolicies(req_params: dict, resp: 't.ListAttachedRolePoliciesResponseTypeDef'):
     for node in resp['AttachedPolicies']:
         node.update(req_params)
         yield Policy({'Arn': node['PolicyArn'], 'PolicyName': node['PolicyName']})
         yield RolePolicyAttachments(node)
 
 
-def ListAttachedGroupPolicies(req_params: dict, resp: t.ListAttachedGroupPoliciesResponseTypeDef):
+def ListAttachedGroupPolicies(req_params: dict, resp: 't.ListAttachedGroupPoliciesResponseTypeDef'):
     for node in resp['AttachedPolicies']:
         node.update(req_params)
         yield Policy({'Arn': node['PolicyArn'], 'PolicyName': node['PolicyName']})
