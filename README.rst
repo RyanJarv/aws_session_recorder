@@ -47,8 +47,7 @@ From here you'll be dropped in to a IPython shell which has an IAM boto3 resourc
 
 After you have some run a few requests, you can view the data in the sqlite.db with datasette.
 ::
-    poetry shell
-    datasette serve -o sqlite.db 
+    poetry run datasette serve -o sqlite.db 
 
 This should open your browser to the datasette web console.
 
