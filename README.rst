@@ -6,8 +6,8 @@ aws-session-recorder
 .. image:: https://img.shields.io/pypi/v/aws_session_recorder.svg
         :target: https://pypi.python.org/pypi/aws_session_recorder
 
-.. image:: https://img.shields.io/travis/RyanJarv/aws_session_recorder.svg
-        :target: https://travis-ci.com/RyanJarv/aws_session_recorder
+.. image:: https://github.com/RyanJarv/aws_session_recorder/workflows/Python%20package/badge.svg
+        :target: https://github.com/RyanJarv/aws_session_recorder/actions
 
 .. image:: https://readthedocs.org/projects/aws-session-recorder/badge/?version=latest
         :target: https://aws-session-recorder.readthedocs.io/en/latest/?badge=latest
