@@ -35,7 +35,7 @@ Features
 CLI
 ----
 For the moment this package isn't in PyPi, you can manage a virtualenv locally with poetry though.
-
+::
     git clone https://github.com/RyanJarv/aws_session_recorder.git
     cd aws_session_recorder
     pip install poetry
@@ -46,7 +46,7 @@ For the moment this package isn't in PyPi, you can manage a virtualenv locally w
 From here you'll be dropped in to a IPython shell which has an IAM boto3 resource object named iam. You can poke around and use it just like you usually would.
 
 After you have some run a few requests, you can view the data in the sqlite.db with datasette.
-
+::
     poetry shell
     datasette serve -o sqlite.db 
 
