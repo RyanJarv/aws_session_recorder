@@ -91,6 +91,12 @@ def GetPolicyVersion(req_params: dict, resp: t.GetPolicyVersionResponseTypeDef):
     return PolicyVersion(resp['PolicyVersion'])
 
 
+def ListPolicyVersions(req_params: dict, resp: t.ListPolicyVersionsResponseTypeDef):
+    print(resp.keys())
+    for version in resp['Versions']:
+        PolicyVersion(version)
+
+
 def GetInstanceProfile(req_params: dict, resp: t.GetInstanceProfileResponseTypeDef):
     # TODO: handle datetime in role policy
     resp['InstanceProfile']['Roles'] = json.loads(json.dumps(resp['InstanceProfile']['Roles'], default=str))
@@ -167,6 +173,7 @@ ApiCallMap = {
     'ListGroupPolicies': ListGroupPolicies,
     'GetPolicy': GetPolicy,
     'GetPolicyVersion': GetPolicyVersion,
+    'ListPolicyVersions': ListPolicyVersions,
     'GetInstanceProfile': GetInstanceProfile,
     'ListAccessKeys': ListAccessKeys,
     'GetGroup': GetGroup,

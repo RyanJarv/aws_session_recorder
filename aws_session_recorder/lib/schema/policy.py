@@ -93,7 +93,8 @@ class Policy(Base):
 class PolicyVersion(Base):
     __tablename__ = "policy_version"
 
-    def __init__(self, resp):
+    def __init__(self, resp: 't.PolicyVersionTypeDef'):
+        print(f'response {resp}')
         super().__init__(**resp)
 
     VersionId: str = sa.Column(sa.String, primary_key=True)

@@ -8,6 +8,7 @@ import sqlalchemy  # type: ignore
 import sqlalchemy.orm  # type: ignore
 import sqlalchemy.ext.declarative  # type: ignore
 
+from aws_session_recorder import settings
 from aws_session_recorder.lib.schema.functions import ApiCallMap
 from aws_session_recorder.lib.schema.base import Base
 
@@ -20,7 +21,7 @@ class Session(boto3.session.Session):
         self.setup()
 
     def setup(self):
-        engine = sqlalchemy.create_engine("sqlite:///:memory:", echo=False)
+        engine = sqlalchemy.create_engine(settings.DATABASE_CONNECTION_PATH, echo=False)
         Base.metadata.create_all(engine)
         self.db = sqlalchemy.orm.Session(engine)
 
@@ -61,4 +62,6 @@ class Session(boto3.session.Session):
         else:
             self.db.merge(row)
 
+        self.db.commit()
+        self.db.flush()
 

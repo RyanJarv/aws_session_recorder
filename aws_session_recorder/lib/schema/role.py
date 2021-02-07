@@ -23,6 +23,7 @@ class Role(Identity):
     AssumeRolePolicyDocument: dict = sa.Column(JSONType)
     MaxSessionDuration: int = sa.Column(sa.Integer)
     RoleLastUsed: dict = sa.Column(JSONType)
+    Description: str = sa.Column(sa.String)
 
     arn = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
 
