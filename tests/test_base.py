@@ -1,11 +1,13 @@
 """Tests for `aws_session_recorder` package."""
-
+import typing
 from typing import Iterator
 
 import pytest  # type: ignore
-from moto import mock_iam # type: ignore
-from mypy_boto3_iam.client import IAMClient  # type: ignore
-from mypy_boto3_iam import type_defs as t  # type: ignore
+from moto import mock_iam  # type: ignore
+
+if typing.TYPE_CHECKING:
+    from mypy_boto3_iam.client import IAMClient  # type: ignore
+    from mypy_boto3_iam import type_defs as t  # type: ignore
 
 from aws_session_recorder import settings
 from aws_session_recorder.lib.session import Session
@@ -62,6 +64,7 @@ def group(iam, user: t.GetUserResponseTypeDef) -> t.GetGroupResponseTypeDef:
 def instance_profile(iam: IAMClient) -> t.GetInstanceProfileResponseTypeDef:
     resp = iam.create_instance_profile(InstanceProfileName='test_instance_profile')
     return iam.get_instance_profile(InstanceProfileName=resp['InstanceProfile']['InstanceProfileName'])
+
 
 @pytest.fixture(scope='function')
 def policy(iam: IAMClient) -> t.GetPolicyResponseTypeDef:

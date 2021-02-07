@@ -1,10 +1,19 @@
 import json
 
+import pytest
+import typing
+
+from aws_session_recorder.lib.session import Session
+from tests.test_base import test_policy_doc, role_name
+
+if typing.TYPE_CHECKING:
+    from mypy_boto3_iam.client import IAMClient  # type: ignore
+    from mypy_boto3_iam import type_defs as t  # type: ignore
+
 """Tests for `aws_session_recorder.lib.schema.user` package."""
 from aws_session_recorder.lib.schema.role import Role, RolePolicy
-from tests.test_base import *
 
-role_name2 = role_name+"2"
+role_name2 = role_name + "2"
 
 
 def test_role(role, session):
@@ -40,6 +49,7 @@ def test_list_roles(session: Session, list_roles: t.ListRolesResponseTypeDef):
     assert len(list_roles['Roles']) == session.db.query(Role).count()
     assert len(list_roles['Roles']) == 2
 
+
 @pytest.fixture(scope='function')
 def inline_role_policy_list(iam: IAMClient, role: t.GetRoleResponseTypeDef) -> t.ListRolePoliciesResponseTypeDef:
     iam.put_role_policy(RoleName=role_name, PolicyName='test_policy', PolicyDocument=test_policy_doc)
@@ -58,8 +68,9 @@ def test_inline_role_policy_list_by_role(session: Session, inline_role_policy_li
 
 # Listing updates the record but doesn't have a PolicyDocument associated with it, so make sure we don't delete the
 # one that already exists with GetUserPolicy.
-def test_inline_role_policy_get_then_list(session: Session, inline_role_policy: t.GetUserPolicyResponseTypeDef, inline_role_policy_list: t.ListUserPoliciesResponseTypeDef):
-    #TODO: Return hash with UserPolicy.PolicyDocument
+def test_inline_role_policy_get_then_list(session: Session, inline_role_policy: t.GetUserPolicyResponseTypeDef,
+                                          inline_role_policy_list: t.ListUserPoliciesResponseTypeDef):
+    # TODO: Return hash with UserPolicy.PolicyDocument
     assert inline_role_policy['PolicyDocument'] == json.loads(session.db.query(RolePolicy).first().PolicyDocument)
 
 
@@ -84,5 +95,3 @@ def test_inline_role_policy_document(session, inline_role_policy: t.GetRolePolic
     # TODO: Fix this edge case
     db_doc = json.dumps(json.loads(session.db.query(RolePolicy).first().PolicyDocument))
     assert live_doc == db_doc
-
-

@@ -9,6 +9,7 @@ from sqlalchemy.orm import relationship  # type: ignore
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.base import Base, TimeStamp
 from aws_session_recorder.lib.schema.identity import InlinePolicy
+from aws_session_recorder.lib.schema.policy import Policy
 
 if TYPE_CHECKING:
     from mypy_boto3_iam import type_defs as t  # type: ignore
@@ -38,7 +39,7 @@ class Group(Base):
 
     users: List[Any] = relationship("User", back_populates="groups", secondary=group_membership)
 
-    attached_policies: 'List[Policy]' = relationship('GroupPolicyAttachments', back_populates='group')
+    attached_policies: List['Policy'] = relationship('GroupPolicyAttachments', back_populates='group')
     inline_policies: 'List[GroupPolicy]' = relationship("GroupPolicy", cascade="all, delete-orphan", back_populates="group")
 
 

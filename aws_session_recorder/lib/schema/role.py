@@ -8,12 +8,14 @@ from sqlalchemy_utils import JSONType  # type: ignore
 
 from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.identity import Identity, InlinePolicy
+from aws_session_recorder.lib.schema.policy import Policy
 
 if TYPE_CHECKING:
     from mypy_boto3_iam import type_defs as t  # type: ignore
 else:
     t = AlwaysDoNothing()
     client = AlwaysDoNothing()
+
 
 class Role(Identity):
     __tablename__ = "role"
@@ -27,8 +29,8 @@ class Role(Identity):
 
     arn = sa.Column(sa.String, sa.ForeignKey('identity.Arn'))
 
-    attached_policies: 'List[Policy]' = relationship('RolePolicyAttachments', back_populates='role')
-    inline_policies: 'List[RolePolicy]' = relationship("RolePolicy", cascade="all, delete-orphan", back_populates="role")
+    attached_policies: List['Policy'] = relationship('RolePolicyAttachments', back_populates='role')
+    inline_policies: List['RolePolicy'] = relationship("RolePolicy", cascade="all, delete-orphan", back_populates="role")
 
     __mapper_args__ = {
         'polymorphic_identity': 'role'

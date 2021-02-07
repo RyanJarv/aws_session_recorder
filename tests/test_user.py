@@ -1,10 +1,19 @@
 import json
 
+import pytest
+import typing
+
+from aws_session_recorder.lib import Session
+from tests.test_base import user_name, test_policy_doc
+
 """Tests for `aws_session_recorder.lib.schema.user` package."""
 from aws_session_recorder.lib.schema.user import User, AccessKey, UserPolicy
-from tests.test_base import *
 
-user_name2 = user_name+"2"
+if typing.TYPE_CHECKING:
+    from mypy_boto3_iam.client import IAMClient  # type: ignore
+    from mypy_boto3_iam import type_defs as t  # type: ignore
+
+user_name2 = user_name + "2"
 
 
 def test_user(user, session):
@@ -68,10 +77,12 @@ def test_inline_user_policy_list_by_user(session: Session, inline_user_policy_li
     user: User = session.db.query(User).first()
     assert live_name == user.inline_policies[0].PolicyName
 
+
 # Listing updates the record but doesn't have a PolicyDocument associated with it, so make sure we don't delete the
 # one that already exists with GetUserPolicy.
-def test_inline_user_policy_get_then_list(session: Session, inline_user_policy: t.GetUserPolicyResponseTypeDef, inline_user_policy_list: t.ListUserPoliciesResponseTypeDef):
-    #TODO: Return hash with UserPolicy.PolicyDocument
+def test_inline_user_policy_get_then_list(session: Session, inline_user_policy: t.GetUserPolicyResponseTypeDef,
+                                          inline_user_policy_list: t.ListUserPoliciesResponseTypeDef):
+    # TODO: Return hash with UserPolicy.PolicyDocument
     assert inline_user_policy['PolicyDocument'] == json.loads(session.db.query(UserPolicy).first().PolicyDocument)
 
 

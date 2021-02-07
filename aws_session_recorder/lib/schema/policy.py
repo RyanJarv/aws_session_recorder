@@ -105,5 +105,3 @@ class PolicyVersion(Base):
 
     policy_id: int = sa.Column(sa.Integer, sa.ForeignKey('policy.id'))
     policy = relationship("Policy", back_populates="versions")
-
-

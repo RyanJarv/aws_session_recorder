@@ -12,6 +12,7 @@ from aws_session_recorder import settings
 from aws_session_recorder.lib.schema.functions import ApiCallMap
 from aws_session_recorder.lib.schema.base import Base
 
+
 class Session(boto3.session.Session):
     db: sqlalchemy.orm.Session
     Base: sqlalchemy.ext.declarative.DeclarativeMeta
@@ -31,12 +32,14 @@ class Session(boto3.session.Session):
         client.meta.events.register('after-call.iam.*', self.record_response)
         return client
 
-    def record_request(self,
-                       params: dict,
-                       model: botocore.model.OperationModel,
-                       context: dict,
-                       event_name: str,
-                       *args, **kwargs):
+    def record_request(
+        self,
+        params: dict,
+        model: botocore.model.OperationModel,
+        context: dict,
+        event_name: str,
+        *args, **kwargs
+    ):
         context['request_params'] = params
 
     def record_response(self,
@@ -64,4 +67,3 @@ class Session(boto3.session.Session):
 
         self.db.commit()
         self.db.flush()
-

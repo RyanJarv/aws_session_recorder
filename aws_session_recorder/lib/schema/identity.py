@@ -29,7 +29,7 @@ class Identity(Base):
     CreateDate: datetime.datetime = sa.Column(TimeStamp)
     Tags: List[t.TagTypeDef] = sa.Column(JSONType)
 
-    #attached_policies = relationship("Policy", secondary=policy_attachments)
+    # attached_policies = relationship("Policy", secondary=policy_attachments)
 
     type: str = sa.Column(sa.String(20))
 

@@ -2,11 +2,21 @@
 
 import json
 
+import pytest
+import typing
+from mypyc.build import group_name
+
+from aws_session_recorder.lib import Session
 from aws_session_recorder.lib.schema.group import Group, GroupPolicy
 from aws_session_recorder.lib.schema.user import User
-from tests.test_base import *
+from tests.test_base import test_policy_doc
 
-group_name2 = group_name+"2"
+if typing.TYPE_CHECKING:
+    from mypy_boto3_iam.client import IAMClient  # type: ignore
+    from mypy_boto3_iam import type_defs as t  # type: ignore
+
+group_name2 = group_name + "2"
+
 
 def test_group(session, group: t.GetGroupResponseTypeDef):
     g: Group = session.db.query(Group).all()[0]
@@ -37,6 +47,7 @@ def test_list_groups(session: Session, list_groups: t.ListGroupsResponseTypeDef)
     assert len(list_groups['Groups']) == session.db.query(Group).count()
     assert len(list_groups['Groups']) == 2
 
+
 def test_group_has_users(session, group: t.GetGroupResponseTypeDef):
     db_grp: Group = session.db.query(Group).all()[0]
     assert group['Users'][0]['Arn'] == db_grp.users[0].Arn
@@ -63,11 +74,14 @@ def test_inline_group_policy_list_by_group(session: Session, inline_group_policy
     group: Group = session.db.query(Group).first()
     assert live_name == group.inline_policies[0].PolicyName
 
+
 # Listing updates the record but doesn't have a PolicyDocument associated with it, so make sure we don't delete the
 # one that already exists with GetUserPolicy.
-def test_inline_group_policy_get_then_list(session: Session, inline_group_policy: t.GetUserPolicyResponseTypeDef, inline_group_policy_list: t.ListUserPoliciesResponseTypeDef):
-    #TODO: Return hash with UserPolicy.PolicyDocument
+def test_inline_group_policy_get_then_list(session: Session, inline_group_policy: t.GetUserPolicyResponseTypeDef,
+                                           inline_group_policy_list: t.ListUserPoliciesResponseTypeDef):
+    # TODO: Return hash with UserPolicy.PolicyDocument
     assert inline_group_policy['PolicyDocument'] == json.loads(session.db.query(GroupPolicy).first().PolicyDocument)
+
 
 @pytest.fixture(scope='function')
 def inline_group_policy(iam, group) -> t.GetGroupPolicyResponseTypeDef:

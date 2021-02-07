@@ -10,6 +10,7 @@ from aws_session_recorder.lib.helpers import AlwaysDoNothing
 from aws_session_recorder.lib.schema.base import Base, TimeStamp
 from aws_session_recorder.lib.schema.group import Group, group_membership
 from aws_session_recorder.lib.schema.identity import Identity, InlinePolicy
+from aws_session_recorder.lib.schema.policy import Policy
 
 if TYPE_CHECKING:
     from mypy_boto3_iam import type_defs as t  # type: ignore
@@ -67,4 +68,3 @@ class UserPolicy(InlinePolicy):
     __mapper_args__ = {
         'polymorphic_identity': 'user'
     }
-

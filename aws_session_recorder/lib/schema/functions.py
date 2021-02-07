@@ -87,14 +87,14 @@ def ListPolicies(req_params: dict, resp: t.ListPoliciesResponseTypeDef) -> Itera
     for p in resp['Policies']:
         yield Policy(p)
 
+
 def GetPolicyVersion(req_params: dict, resp: t.GetPolicyVersionResponseTypeDef):
     return PolicyVersion(resp['PolicyVersion'])
 
 
 def ListPolicyVersions(req_params: dict, resp: t.ListPolicyVersionsResponseTypeDef):
-    print(resp.keys())
     for version in resp['Versions']:
-        PolicyVersion(version)
+        yield PolicyVersion(version)
 
 
 def GetInstanceProfile(req_params: dict, resp: t.GetInstanceProfileResponseTypeDef):
@@ -124,6 +124,7 @@ def ListAttachedUserPolicies(req_params: dict, resp: t.ListAttachedUserPoliciesR
         yield Policy({'Arn': node['PolicyArn'], 'PolicyName': node['PolicyName']})
         yield UserPolicyAttachments(node)
 
+
 def ListAttachedRolePolicies(req_params: dict, resp: t.ListAttachedRolePoliciesResponseTypeDef):
     for node in resp['AttachedPolicies']:
         node.update(req_params)
@@ -136,6 +137,7 @@ def ListAttachedGroupPolicies(req_params: dict, resp: t.ListAttachedGroupPolicie
         node.update(req_params)
         yield Policy({'Arn': node['PolicyArn'], 'PolicyName': node['PolicyName']})
         yield GroupPolicyAttachments(node)
+
 
 # TODO:
 #   * get-account-authorization-details
@@ -179,4 +181,3 @@ ApiCallMap = {
     'GetGroup': GetGroup,
     'ListGroups': ListGroups,
 }
-
