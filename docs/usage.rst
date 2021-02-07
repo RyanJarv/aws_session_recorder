@@ -3,7 +3,7 @@ Usage
 =====
 
 ___
-cli
+Cli
 ___
 
 asr --profile <profile name>

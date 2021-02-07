@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_session_recorder"
-version = "0.2.0"
+version = "0.2.1"
 description = "AWS session that records discovered resources to a database"
 authors = ["Ryan Gerstenkorn <ryan.gerstenkorn@rhinosecuritylabs.com>"]
 license = "BSD"
