@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_session_recorder"
-version = "0.2.1"
+version = "0.2.2"
 description = "AWS session that records discovered resources to a database"
 authors = ["Ryan Gerstenkorn <ryan.gerstenkorn@rhinosecuritylabs.com>"]
 license = "BSD"
@@ -9,7 +9,7 @@ homepage = "https://aws-session-recorder.readthedocs.io/en/latest/"
 readme = 'README.rst'
 
 [tool.poetry.scripts]
-asr = "aws_session_recorder.main:app"
+aws-session-recorder = "aws_session_recorder.main:app"
 
 [tool.poetry.dependencies]
 python = "^3.7"
