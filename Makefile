@@ -68,6 +68,7 @@ coverage: ## check code coverage quickly with the default Python
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/aws_session_recorder.rst
 	rm -f docs/modules.rst
+	poetry export --without-hashes -E cli --dev -o docs/requirements.txt
 	sphinx-apidoc -o docs/ aws_session_recorder
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
