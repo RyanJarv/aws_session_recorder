@@ -4,6 +4,9 @@ version = "0.2.1"
 description = "AWS session that records discovered resources to a database"
 authors = ["Ryan Gerstenkorn <ryan.gerstenkorn@rhinosecuritylabs.com>"]
 license = "BSD"
+repository = "https://github.com/RyanJarv/aws_session_recorder"
+homepage = "https://aws-session-recorder.readthedocs.io/en/latest/"
+readme = 'README.rst'
 
 [tool.poetry.scripts]
 asr = "aws_session_recorder.main:app"
@@ -23,12 +26,15 @@ cli = ["ipython", "typer"]
 
 [tool.poetry.dev-dependencies]
 moto = {extras = ["iam"], version = "^1.3.16"}
+ipython = {version = "^7.20.0"}
+typer = {version = "^0.3.2"}
 boto3-stubs = {extras = ["iam"], version = "^1.17.3"}
 pytest = "^6.2.2"
 flake8 = "^3.8.4"
 mypy = "^0.800"
 Sphinx = "^3.4.3"
 tox = "^3.21.4"
+coverage = "^5.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

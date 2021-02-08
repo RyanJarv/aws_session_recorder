@@ -1,5 +1,5 @@
 Welcome to aws-session-recorder's documentation!
-======================================
+================================================
 
 .. toctree::
    :maxdepth: 2
